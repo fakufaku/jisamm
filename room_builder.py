@@ -107,9 +107,14 @@ def convergence_callback(
     # here we copy the first source to fill the channel of the background
     synth[n_targets, :m] = y[:m, 0]
 
-    sdr, sir, sar, perm = si_bss_eval(
-        ref_sig[: n_targets + 1, :m].T, synth[:, :m].T
-    )
+    if np.sum(np.abs(ref_sig[n_targets, :])) < 1e-10:
+        sdr, sir, sar, perm = si_bss_eval(
+            ref_sig[: n_targets, :m].T, synth[:-1, :m].T
+        )
+    else:
+        sdr, sir, sar, perm = si_bss_eval(
+            ref_sig[: n_targets + 1, :m].T, synth[:, :m].T
+        )
     SDR.append(sdr[:n_targets].tolist())
     SIR.append(sir[:n_targets].tolist())
 

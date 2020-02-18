@@ -41,6 +41,7 @@ def five(
     proj_back=True,
     W0=None,
     model="laplace",
+    init_eig=True,
     return_filters=False,
     callback=None,
     callback_checkpoints=[],
@@ -66,8 +67,6 @@ def five(
         The number of iterations (default 3)
     proj_back: bool, optional
         Scaling on first mic by back projection (default True)
-    W0: ndarray (nfrequencies, nsrc, nchannels), optional
-        Initial value for demixing matrix
     model: str
         The model of source distribution 'gauss' or 'laplace' (default)
     init_eig: bool, optional (default ``False``)

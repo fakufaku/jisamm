@@ -191,7 +191,6 @@ def overiva(
     # Initialize the demixing matrix to identity
     W[:, :n_src, :n_src] = np.eye(n_src)[None, :, :]
     W[:, n_src:, n_src:] = -np.eye(n_chan - n_src)[None, :, :]  # for the constraint
-    print(W[100])
 
     # Things are more efficient when the frequencies are over the first axis
     X_original = X  # keep the original for the projection back
@@ -237,25 +236,23 @@ def overiva(
 
             for s in range(n_src):
 
-                # Iterative Projection
-                _ip_single(s, X, W, r_inv[s, :])
-
                 # Update the mixing matrix according to orthogonal constraints
                 if n_src < n_chan:
                     _parametric_background_update(n_src, W, Cx)
 
-            print(np.max(np.abs(W[:, :n_src, :] @ Cx @ tensor_H(W[:, n_src:, :]))))
+                # Iterative Projection
+                _ip_single(s, X, W, r_inv[s, :])
 
         elif update_rule == "ip2-param":
 
             # Update source pairs with a joint IP2 update
             for s1, s2 in TwoStepsIterator(n_src):
 
-                # Iterative Projection 2
-                _ip_double(s1, s2, X, W, r_inv[[s1, s2], :])
-
                 if n_src < n_chan:
                     _parametric_background_update(n_src, W, Cx)
+
+                # Iterative Projection 2
+                _ip_double(s1, s2, X, W, r_inv[[s1, s2], :])
 
         elif update_rule == "demix-bg":
 
@@ -269,24 +266,24 @@ def overiva(
             # Update each source with an IP update
             for s in range(n_src):
 
-                # Iterative Projection
-                _ip_single(s, X, W, r_inv[s, :])
-
                 if n_src < n_chan:
                     # Update the background with a block IP update
                     _block_ip(list(range(n_src, n_chan)), X, W, Cx)
+
+                # Iterative Projection
+                _ip_single(s, X, W, r_inv[s, :])
 
         elif update_rule == "ip2-block":
 
             # Update source pairs with a joint IP2 update
             for s1, s2 in TwoStepsIterator(n_src):
 
-                # Iterative Projection 2
-                _ip_double(s1, s2, X, W, r_inv[[s1, s2], :])
-
                 if n_src < n_chan:
                     # Update the background with a block IP update
                     _block_ip(list(range(n_src, n_chan)), X, W, Cx)
+
+                # Iterative Projection 2
+                _ip_double(s1, s2, X, W, r_inv[[s1, s2], :])
 
         else:
             raise ValueError("Invalid update rules")

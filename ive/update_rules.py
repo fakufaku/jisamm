@@ -89,7 +89,7 @@ def _joint_demix_background(s, n_src, X, W, r_inv, Cx):
     # right-hand side for computation of null space basis
     # no_update = [i for i in range(n_src) if i != s]
     update = [s] + list(range(n_src, n_chan))
-    rhs = np.eyes(n_chan)[None, :, update]
+    rhs = np.eye(n_chan)[None, :, update]
 
     # Compute Auxiliary Variable
     # shape: (n_freq, n_chan, n_chan)

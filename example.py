@@ -30,7 +30,7 @@ import numpy as np
 
 # Get the data if needed
 from get_data import get_data, samples_dir
-from mir_eval.separation import bss_eval_sources
+import pyroomacoustics as pra
 from pyroomacoustics.bss import projection_back
 from routines import PlaySoundGUI, grid_layout, random_layout, semi_circle_layout
 from room_builder import callback_noise_mixer, convergence_callback
@@ -339,8 +339,10 @@ if __name__ == "__main__":
     # Look at the result
     SDR = np.array(SDR)
     SIR = np.array(SIR)
-    print(f"SDR: In: {SDR[0, 0]:6.2f} dB -> Out: {SDR[-1, 0]:6.2f} dB")
-    print(f"SIR: In: {SIR[0, 0]:6.2f} dB -> Out: {SIR[-1, 0]:6.2f} dB")
+    for s in range(n_sources_target):
+        print(f"SDR: In: {SDR[0, s]:6.2f} dB -> Out: {SDR[-1, s]:6.2f} dB")
+    for s in range(n_sources_target):
+        print(f"SIR: In: {SIR[0, s]:6.2f} dB -> Out: {SIR[-1, s]:6.2f} dB")
 
     import matplotlib.pyplot as plt
 
@@ -357,8 +359,9 @@ if __name__ == "__main__":
     plt.tight_layout(pad=0.5)
 
     plt.figure()
-    plt.plot([0] + callback_checkpoints, SDR[:, 0], label="SDR", marker="*")
-    plt.plot([0] + callback_checkpoints, SIR[:, 0], label="SIR", marker="o")
+    for s in range(n_sources_target):
+        plt.plot([0] + callback_checkpoints, SDR[:, s], label="SDR", marker="*")
+        plt.plot([0] + callback_checkpoints, SIR[:, s], label="SIR", marker="o")
     plt.legend()
     plt.tight_layout(pad=0.5)
 
