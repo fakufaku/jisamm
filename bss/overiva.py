@@ -107,10 +107,12 @@ def overiva_ip2_block(X, **kwargs):
 
 
 def auxiva(X, **kwargs):
+    kwargs.pop("n_src")
     return overiva(X, n_src=None, update_rule="ip-param", **kwargs)
 
 
 def auxiva2(X, **kwargs):
+    kwargs.pop("n_src")
     return overiva(X, n_src=None, update_rule="ip2-param", **kwargs)
 
 

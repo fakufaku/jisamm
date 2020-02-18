@@ -55,6 +55,7 @@ def ogive(
     return_filters=False,
     callback=None,
     callback_checkpoints=[],
+    **kwargs,
 ):
 
     """

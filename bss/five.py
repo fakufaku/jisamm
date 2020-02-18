@@ -46,6 +46,7 @@ def five(
     callback=None,
     callback_checkpoints=[],
     cost_callback=None,
+    **kwargs,
 ):
 
     """

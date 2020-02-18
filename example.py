@@ -36,7 +36,7 @@ from routines import PlaySoundGUI, grid_layout, random_layout, semi_circle_layou
 from room_builder import callback_noise_mixer, convergence_callback
 from scipy.io import wavfile
 
-import ive
+import bss
 
 from get_data import samples_dir
 from samples.generate_samples import sampling, wav_read_center
@@ -49,7 +49,7 @@ sys.path.append(samples_dir)
 # We concatenate a few samples to make them long enough
 if __name__ == "__main__":
 
-    algo_choices = list(ive.algos.keys())
+    algo_choices = list(bss.algos.keys())
     model_choices = ["laplace", "gauss"]
     init_choices = ["eye", "eig"]
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     if args.n_iter % 2 == 1:
         args.n_iter += 1
 
-    if ive.is_single_source[args.algo]:
+    if bss.is_single_source[args.algo]:
         print("IVE only works with a single source. Using only one source.")
         n_sources_target = 1
 
@@ -236,7 +236,7 @@ if __name__ == "__main__":
             ref_mic,
             stft_params,
             args.algo,
-            not ive.is_determined[args.algo],
+            not bss.is_determined[args.algo],
         )
 
     if args.algo.startswith("ogive"):
@@ -244,7 +244,7 @@ if __name__ == "__main__":
             range(1, ogive_iter + ogive_iter // n_iter, ogive_iter // n_iter)
         )
     else:
-        if ive.is_dual_update[args.algo]:
+        if bss.is_dual_update[args.algo]:
             callback_checkpoints = list(range(2, n_iter + 1, 2))
         else:
             callback_checkpoints = list(range(1, n_iter + 1))
@@ -267,7 +267,7 @@ if __name__ == "__main__":
 
     # Initialization
     if args.init == "eig":
-        X0 = ive.pca(X_mics)
+        X0 = bss.pca(X_mics)
     elif args.init == "eye":
         X0 = X_mics
     else:
@@ -276,7 +276,7 @@ if __name__ == "__main__":
     # Now run the algorithm
     if args.algo.startswith("ogive"):
 
-        Y = ive.algos[args.algo](
+        Y = bss.algos[args.algo](
             X0,
             n_iter=ogive_iter,
             step_size=ogive_mu,
@@ -286,9 +286,9 @@ if __name__ == "__main__":
             callback_checkpoints=callback_checkpoints,
         )
 
-    elif ive.is_determined[args.algo] or ive.is_single_source[args.algo]:
+    elif bss.is_determined[args.algo] or bss.is_single_source[args.algo]:
 
-        Y = ive.algos[args.algo](
+        Y = bss.algos[args.algo](
             X0,
             n_iter=n_iter,
             proj_back=False,
@@ -299,7 +299,7 @@ if __name__ == "__main__":
 
     else:
 
-        Y = ive.algos[args.algo](
+        Y = bss.algos[args.algo](
             X0,
             n_src=n_sources_target,
             n_iter=n_iter,
@@ -389,5 +389,5 @@ if __name__ == "__main__":
 
         # Make a simple GUI to listen to the separated samples
         root = Tk()
-        my_gui = PlaySoundGUI(root, room.fs, mix[0, :], y_hat.T, references=ref[:1, :])
+        my_gui = PlaySoundGUI(root, room.fs, mix[0, :], y_hat.T, references=refs[:n_sources_target, :])
         root.mainloop()

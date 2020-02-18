@@ -53,6 +53,8 @@ is_single_source = {
     "ogive-switch": True,
 }
 
+# This is a list that indicates which algorithms
+# can only work with two or more sources
 is_dual_update = {
     "auxiva": False,
     "auxiva2": True,
@@ -62,7 +64,7 @@ is_dual_update = {
     "overiva-ip-block": False,
     "overiva-ip2-block": True,
     "overiva-demix-bg": False,
-    "auxiva_pca": False,
+    "auxiva_pca": True,
     "pca": False,
     "five": False,
     "ogive": False,
