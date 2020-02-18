@@ -1,0 +1,4 @@
+[submodule "bsseval"]
+	path = bsseval
+	url = https://github.com/fakufaku/bsseval.git
+	branch = efficient_permutation
