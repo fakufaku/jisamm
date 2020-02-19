@@ -40,7 +40,11 @@ def run(args, parameters):
     np.random.seed(seed)
 
     # get all the signals
-    source_signals = wav_read_center(room_params["wav"][:n_sources], seed=123)
+    files_absolute = [
+        os.path.join(parameters["base_dir"], fn)
+        for fn in room_params["wav"][:n_sources]
+    ]
+    source_signals = wav_read_center(files_absolute, seed=123)
 
     # create the room
     room = pra.ShoeBox(**room_params["room_kwargs"])

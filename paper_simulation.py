@@ -48,6 +48,8 @@ def init(parameters):
 def one_loop(args):
     global parameters
 
+    import sys
+    sys.path.append(parameters["base_dir"])
     from simulation_loop import run
 
     return run(args, parameters)
