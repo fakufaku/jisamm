@@ -27,9 +27,8 @@ def run(args, parameters):
     """
 
     # expand arguments
-    sinr, n_targets, n_interf, dist_ratio, room_params, seed = args
+    sinr, n_targets, n_interf, n_mics, dist_ratio, room_params, seed = args
 
-    n_mics = len(room_params["mic_array"])
     n_sources = n_targets + n_interf
 
     # this is the underdetermined case. We don't do that.
@@ -45,9 +44,8 @@ def run(args, parameters):
 
     # create the room
     room = pra.ShoeBox(**parameters["room"]["room_kwargs"])
-    room.add_microphone_array(
-        pra.MicrophoneArray(np.array(room_params["mic_array"]).T, room.fs)
-    )
+    R = np.array(room_params["mic_array"])
+    room.add_microphone_array(pra.MicrophoneArray(R[:, :n_mics], room.fs))
     source_locs = np.array(room_params["sources"])
     for n in range(n_sources):
         room.add_source(source_locs[:, n], signal=source_signals[n, :])
@@ -177,7 +175,12 @@ def run(args, parameters):
             t_start = time.perf_counter()
 
             Y = bss.separate(
-                X_mics, n_src=n_targets, algorithm=name, callback=cb, proj_back=False, **kwargs
+                X_mics,
+                n_src=n_targets,
+                algorithm=name,
+                callback=cb,
+                proj_back=False,
+                **kwargs
             )
 
             t_finish = time.perf_counter()

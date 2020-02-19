@@ -1,4 +1,6 @@
 import time
+import json
+from pathlib import Path
 import numpy as np
 import pyroomacoustics as pra
 from pyroomacoustics.bss.common import projection_back
@@ -8,11 +10,113 @@ from room_builder import (
     choose_target_locations,
     random_locations,
     convergence_callback,
+    random_room_definition,
 )
 from samples.generate_samples import sampling
 
 
-def exp3_gen_args(config):
+def exp1_gen_args(config):
+
+    np.random.seed(config["seed"])
+
+    # sub-seeds
+    sub_seeds = []
+    for r in range(config["repeat"]):
+        sub_seeds.append(int(np.random.randint(2 ** 32)))
+
+    # maximum number of sources and microphones in the simulation
+    n_sources = np.max(config["n_interferers"]) + np.max(config["n_targets"])
+    n_mics = np.max(config["n_mics"])
+
+    room_file = Path(config["room_cache_file"])
+
+    regenerate_rooms = False  # assume we need to start over
+
+    # now check the content of the cache if it exists
+    if room_file.exists():
+
+        with open(room_file, "r") as f:
+            room_cache = json.load(f)
+
+        # if the content of the config file changes, we should generate again
+        if (
+            room_cache["seed"] != config["seed"]
+            or room_cache["room_params"] != config["room_params"]
+            or len(room_cache["rooms"]) != config["repeat"]
+        ):
+            regenerate_rooms = True
+
+    if not regenerate_rooms:
+        # use the content of the cache
+        rooms = room_cache["rooms"]
+        rt60s = room_cache["rt60s"]
+
+    else:
+        # generate all the rooms
+
+        # choose all the files in advance
+        gen_files_seed = int(np.random.randint(2 ** 32, dtype=np.uint32))
+        all_wav_files = sampling(
+            config["repeat"],
+            n_sources,
+            config["samples_list"],
+            gender_balanced=True,
+            seed=gen_files_seed,
+        )
+
+        # generates all the rooms in advance too
+        rooms = []
+        rt60s = []
+        for i in range(config["repeat"]):
+            room_params, rt60 = random_room_definition(
+                n_sources, n_mics, seed=i, **config["room_params"]
+            )
+            # add the speech signal files to use
+            room_params["wav"] = all_wav_files[r]
+
+            rt60s.append(rt60)
+            rooms.append(room_params)
+
+            # cache the rooms
+            with open(room_file, "w") as f:
+                json.dump(
+                    {
+                        "seed": config["seed"],
+                        "room_params": config["room_params"],
+                        "rooms": rooms,
+                        "rt60s": rt60s,
+                    },
+                    f,
+                )
+
+    # now generates all the other argument combinations
+    args = []
+    for sinr in config["sinr"]:
+        for n_targets in config["n_targets"]:
+            for n_interf in config["n_interferers"]:
+                for n_mics in config["n_mics"]:
+                    for dist_ratio in config["dist_crit_ratio"]:
+                        for r in range(config["repeat"]):
+
+                            # bundle all the room parameters for the simulation
+                            room_params = rooms[r]
+
+                            args.append(
+                                (
+                                    sinr,
+                                    n_targets,
+                                    n_interf,
+                                    n_mics,
+                                    dist_ratio,
+                                    room_params,
+                                    sub_seeds[r],
+                                )
+                            )
+
+    return args
+
+
+def exp2_gen_args(config):
 
     # infer a few arguments
     room_dim = config["room"]["room_kwargs"]["p"]
@@ -20,6 +124,7 @@ def exp3_gen_args(config):
     mic_array = mic_array_center[None, :] + np.array(
         config["room"]["mic_array_geometry_m"]
     )
+    mic_array = mic_array.T
     critical_distance = config["room"]["critical_distance_m"]
 
     # master seed
@@ -66,34 +171,42 @@ def exp3_gen_args(config):
     for sinr in config["sinr"]:
         for n_targets in config["n_targets"]:
             for n_interf in config["n_interferers"]:
-                for dist_ratio in config["dist_crit_ratio"]:
-                    for r in range(config["repeat"]):
+                for n_mics in config["n_mics"]:
+                    for dist_ratio in config["dist_crit_ratio"]:
+                        for r in range(config["repeat"]):
 
-                        # bundle all the room parameters for the simulation
-                        room_params = {
-                            "room_kwargs": config["room"]["room_kwargs"],
-                            "mic_array": mic_array.tolist(),
-                            "sources": np.concatenate(
+                            assert n_mics == mic_array.shape[1], "n_mics and number of microphones used should match"
+
+                            # bundle all the room parameters for the simulation
+                            room_params = {
+                                "room_kwargs": config["room"]["room_kwargs"],
+                                "mic_array": mic_array.tolist(),
+                                "sources": np.concatenate(
+                                    (
+                                        target_locs[n_targets][dist_ratio],
+                                        interferers_locs[r],
+                                    ),
+                                    axis=1,
+                                ).tolist(),
+                                "wav": all_wav_files[r][: n_targets + n_interf],
+                            }
+
+                            args.append(
                                 (
-                                    target_locs[n_targets][dist_ratio],
-                                    interferers_locs[r],
-                                ),
-                                axis=1,
-                            ).tolist(),
-                            "wav": all_wav_files[r][: n_targets + n_interf],
-                        }
-
-                        args.append(
-                            (
-                                sinr,
-                                n_targets,
-                                n_interf,
-                                dist_ratio,
-                                room_params,
-                                sub_seeds[r],
+                                    sinr,
+                                    n_targets,
+                                    n_interf,
+                                    n_mics,
+                                    dist_ratio,
+                                    room_params,
+                                    sub_seeds[r],
+                                )
                             )
-                        )
 
     return args
 
 
+generators = {
+    "speed_contest": exp1_gen_args,
+    "reverb_interf_performance": exp2_gen_args,
+}

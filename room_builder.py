@@ -108,9 +108,7 @@ def convergence_callback(
     synth[n_targets, :m] = y[:m, 0]
 
     if np.sum(np.abs(ref_sig[n_targets, :])) < 1e-10:
-        sdr, sir, sar, perm = si_bss_eval(
-            ref_sig[: n_targets, :m].T, synth[:-1, :m].T
-        )
+        sdr, sir, sar, perm = si_bss_eval(ref_sig[:n_targets, :m].T, synth[:-1, :m].T)
     else:
         sdr, sir, sar, perm = si_bss_eval(
             ref_sig[: n_targets + 1, :m].T, synth[:, :m].T
@@ -405,3 +403,202 @@ def random_room_builder(
         np.random.set_state(rng_state)
 
     return room, t60_actual
+
+
+def random_room_definition(
+    n_sources: List[np.ndarray],
+    n_mics: int,
+    mic_delta: Optional[float] = None,
+    fs: float = 16000,
+    t60_interval: Tuple[float, float] = (0.150, 0.500),
+    room_width_interval: Tuple[float, float] = (6, 10),
+    room_height_interval: Tuple[float, float] = (2.8, 4.5),
+    source_zone_height: Tuple[float, float] = [1.0, 2.0],
+    guard_zone_width: float = 0.5,
+    seed: Optional[int] = None,
+):
+    """
+    This function creates a random room within some parameters.
+
+    The microphone array is circular with the distance between neighboring
+    elements set to the maximal distance avoiding spatial aliasing.
+
+    Parameters
+    ----------
+    source_signals: list of numpy.ndarray
+        A list of audio signals for each source
+    n_mics: int
+        The number of microphones in the microphone array
+    mic_delta: float, optional
+        The distance between neighboring microphones in the array
+    fs: float, optional
+        The sampling frequency for the simulation
+    t60_interval: (float, float), optional
+        An interval where to pick the reverberation time
+    room_width_interval: (float, float), optional
+        An interval where to pick the room horizontal length/width
+    room_height_interval: (float, float), optional
+        An interval where to pick the room vertical length
+    source_zone_height: (float, float), optional
+        The vertical interval where sources and microphones are allowed
+    guard_zone_width: float
+        The minimum distance between a vertical wall and a source/microphone
+
+    Returns
+    -------
+    ShoeBox object
+        A randomly generated room according to the provided parameters
+    float
+        The measured T60 reverberation time of the room created
+    """
+
+    # save current numpy RNG state and set a known seed
+    if seed is not None:
+        rng_state = np.random.get_state()
+        np.random.seed(seed)
+
+    # sanity checks
+    assert source_zone_height[0] > 0
+    assert source_zone_height[1] < room_height_interval[0]
+    assert source_zone_height[0] <= source_zone_height[1]
+    assert 2 * guard_zone_width < room_width_interval[1] - room_width_interval[0]
+
+    def random_location(
+        room_dim, n, ref_point=None, min_distance=None, max_distance=None
+    ):
+        """ Helper function to pick a location in the room """
+
+        width = room_dim[0] - 2 * guard_zone_width
+        width_intercept = guard_zone_width
+
+        depth = room_dim[1] - 2 * guard_zone_width
+        depth_intercept = guard_zone_width
+
+        height = np.diff(source_zone_height)[0]
+        height_intercept = source_zone_height[0]
+
+        locs = rand(3, n)
+        locs[0, :] = locs[0, :] * width + width_intercept
+        locs[1, :] = locs[1, :] * depth + depth_intercept
+        locs[2, :] = locs[2, :] * height + height_intercept
+
+        if ref_point is not None:
+            # Check condition
+            d = np.linalg.norm(locs - ref_point, axis=0)
+
+            if min_distance is not None and max_distance is not None:
+                redo = np.where(np.logical_or(d < min_distance, max_distance < d))[0]
+            elif min_distance is not None:
+                redo = np.where(d < min_distance)[0]
+            elif max_distance is not None:
+                redo = np.where(d > max_distance)[0]
+            else:
+                redo = []
+
+            # Recursively call this function on sources to redraw
+            if len(redo) > 0:
+                locs[:, redo] = random_location(
+                    room_dim,
+                    len(redo),
+                    ref_point=ref_point,
+                    min_distance=min_distance,
+                    max_distance=max_distance,
+                )
+
+        return locs
+
+    c = pra.constants.get("c")
+
+    # Create the room
+    # Sometimes the room dimension and required T60 are not compatible, then
+    # we just try again with new random values
+    retry = True
+    while retry:
+        try:
+            room_dim = np.array(
+                [
+                    rand() * np.diff(room_width_interval)[0] + room_width_interval[0],
+                    rand() * np.diff(room_width_interval)[0] + room_width_interval[0],
+                    rand() * np.diff(room_height_interval)[0] + room_height_interval[0],
+                ]
+            )
+            t60 = rand() * np.diff(t60_interval)[0] + t60_interval[0]
+            reflection, max_order = inv_sabine(t60, room_dim, c)
+            retry = False
+        except ValueError:
+            pass
+
+    # Create the room based on the random parameters
+    room_kwargs = {
+        "p": room_dim.tolist(),
+        "fs": fs,
+        "absorption": 1 - reflection,
+        "max_order": max_order,
+    }
+
+    # The critical distance
+    # https://en.wikipedia.org/wiki/Critical_distance
+    d_critical = 0.057 * np.sqrt(np.prod(room_dim) / t60)
+
+    # default intermic distance is set according to nyquist criterion
+    # i.e. 1/2 wavelength corresponding to fs / 2 at given speed of sound
+    if mic_delta is None:
+        mic_delta = 0.5 * (c / (0.5 * fs))
+
+    # the microphone array is uniformly circular with the distance between
+    # neighboring elements of mic_delta
+    mic_center = random_location(room_dim, 1)
+    mic_rotation = rand() * 2 * np.pi
+    mic_radius = 0.5 * mic_delta / np.sin(np.pi / n_mics)
+    mic_locs = np.vstack(
+        (
+            pra.circular_2D_array(mic_center[:2, 0], n_mics, mic_rotation, mic_radius),
+            mic_center[2, 0] * np.ones(n_mics),
+        )
+    )
+
+    # Now we will get the sources at random
+    source_locs = []
+
+    # Choose the target location at least as far as the critical distance
+    # Then the other sources, yet one further meter away
+    source_locs = random_location(
+        room_dim, n_sources, ref_point=mic_center, min_distance=d_critical + 1
+    )
+
+    # order the sources from closes to the microphones to furthest
+    dist = np.linalg.norm(source_locs - mic_locs[:, 0, None])
+    I_dist = np.argsort(dist)
+    source_locs = source_locs[:, I_dist[::-1]]
+
+    # restore numpy RNG former state
+    if seed is not None:
+        np.random.set_state(rng_state)
+
+    room_params = {
+        "room_kwargs": room_kwargs,
+        "mic_array": mic_locs.tolist(),
+        "sources": source_locs.tolist(),
+    }
+
+    return room_params, estimate_rt60(room_params)
+
+
+def estimate_rt60(room_params):
+    """ Estimate RT60 of room using simulation """
+    # Create the room object
+    room = pra.ShoeBox(**room_params["room_kwargs"])
+    mic_loc = np.mean(room_params["mic_array"], axis=1, keepdims=True)
+    S = np.array(room_params["sources"])
+    room.add_microphone_array(pra.MicrophoneArray(mic_loc, room.fs))
+    for n in range(S.shape[1]):
+        room.add_source(S[:, n])
+
+    # compute the impulse responses
+    room.compute_rir()
+
+    rt60 = np.median(
+        [pra.experimental.measure_rt60(rir, fs=room.fs) for rir in room.rir[0]]
+    )
+
+    return rt60
