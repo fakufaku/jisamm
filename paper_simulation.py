@@ -56,7 +56,7 @@ def one_loop(args):
 def generate_arguments(parameters):
     """ This will generate the list of arguments to run simulation for """
 
-    if parameters["experiment_name"] == "reverb_interf_performanc":
+    if parameters["experiment_name"] == "reverb_interf_performance":
         return exp3_gen_args(parameters)
 
     else:

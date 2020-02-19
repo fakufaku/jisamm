@@ -150,6 +150,24 @@ is_determined = {
     "ogive-switch": False,
 }
 
+is_overdetermined = {
+    "auxiva": False,
+    "auxiva2": False,
+    "overiva": True,
+    "overiva-ip": True,
+    "overiva-ip2": True,
+    "overiva-ip-block": True,
+    "overiva-ip2-block": True,
+    "overiva-demix-bg": True,
+    "auxiva-pca": True,
+    "pca": False,
+    "five": True,
+    "ogive": True,
+    "ogive-mix": True,
+    "ogive-demix": True,
+    "ogive-switch": True,
+}
+
 is_iterative = {
     "auxiva": True,
     "auxiva2": True,

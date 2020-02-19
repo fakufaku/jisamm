@@ -2,6 +2,7 @@
 import os
 import json
 import time
+import traceback
 import numpy as np
 import pyroomacoustics as pra
 
@@ -128,6 +129,9 @@ def run(args, parameters):
         elif bss.is_single_source[name] and n_targets > 1:
             # doesn't work for multi source scenario
             continue
+        elif bss.is_overdetermined[name] and n_targets == n_mics:
+            # don't run the overdetermined stuff in determined case
+            continue
 
         results.append(
             {
@@ -136,6 +140,7 @@ def run(args, parameters):
                 "n_interferers": n_interf,
                 "n_mics": n_mics,
                 "rt60": rt60,
+                "dist_ratio": dist_ratio,
                 "sinr": sinr,
                 "seed": seed,
                 "sdr": [],
@@ -171,7 +176,9 @@ def run(args, parameters):
         try:
             t_start = time.perf_counter()
 
-            Y = bss.algos[name](X_mics, callback=cb, proj_back=False, **kwargs)
+            Y = bss.separate(
+                X_mics, n_src=n_targets, algorithm=name, callback=cb, proj_back=False, **kwargs
+            )
 
             t_finish = time.perf_counter()
 
@@ -195,6 +202,17 @@ def run(args, parameters):
 
         except Exception:
 
+            # get the traceback
+            tb = traceback.format_exc()
+
+            report = {
+                "algorithm": name,
+                "n_src": n_targets,
+                "kwargs": kwargs,
+                "result": results[-1],
+                "tb": tb,
+            }
+
             pid = os.getpid()
             # report last sdr/sir as np.nan
             results[-1]["sdr"].append(np.nan)
@@ -204,7 +222,9 @@ def run(args, parameters):
                 parameters["_results_dir"], "error_{}.json".format(pid)
             )
             with open(fn_err, "a") as f:
-                f.write(json.dumps(results[-1], indent=4))
+                f.write(json.dumps(report, indent=4))
+                f.write(",\n")
+
             # skip to next iteration
             continue
 
