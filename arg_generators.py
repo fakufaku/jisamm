@@ -30,7 +30,7 @@ def exp1_gen_args(config):
 
     room_file = Path(config["room_cache_file"])
 
-    regenerate_rooms = False  # assume we need to start over
+    regenerate_rooms = True  # assume we need to start over
 
     # now check the content of the cache if it exists
     if room_file.exists():
@@ -39,20 +39,22 @@ def exp1_gen_args(config):
             room_cache = json.load(f)
 
         # if the content of the config file changes, we should generate again
-        if (
+        if not (
             room_cache["seed"] != config["seed"]
             or room_cache["room_params"] != config["room_params"]
             or len(room_cache["rooms"]) != config["repeat"]
         ):
-            regenerate_rooms = True
+            regenerate_rooms = False
 
     if not regenerate_rooms:
         # use the content of the cache
+        print("Use the rooms in the cache")
         rooms = room_cache["rooms"]
         rt60s = room_cache["rt60s"]
 
     else:
         # generate all the rooms
+        print("Generate the rooms and measure rt60")
 
         # choose all the files in advance
         gen_files_seed = int(np.random.randint(2 ** 32, dtype=np.uint32))
@@ -88,6 +90,8 @@ def exp1_gen_args(config):
                     },
                     f,
                 )
+
+        print("Done generating the rooms")
 
     # now generates all the other argument combinations
     args = []
@@ -206,7 +210,10 @@ def exp2_gen_args(config):
     return args
 
 
-generators = {
-    "speed_contest": exp1_gen_args,
-    "reverb_interf_performance": exp2_gen_args,
-}
+def generate(config):
+    if config["name"] == "speed_contest":
+        return exp1_gen_args(config)
+    elif config["name"] == "reverb_interf_performance":
+        return exp2_gen_args(config)
+    else:
+        raise ValueError("Invalid experiment name in the configuration")

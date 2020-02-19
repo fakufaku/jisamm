@@ -563,11 +563,11 @@ def random_room_definition(
     # Choose the target location at least as far as the critical distance
     # Then the other sources, yet one further meter away
     source_locs = random_location(
-        room_dim, n_sources, ref_point=mic_center, min_distance=d_critical + 1
+        room_dim, n_sources, ref_point=mic_center, min_distance=d_critical
     )
 
     # order the sources from closes to the microphones to furthest
-    dist = np.linalg.norm(source_locs - mic_locs[:, 0, None])
+    dist = np.linalg.norm(source_locs - mic_locs[:, 0, None], axis=0)
     I_dist = np.argsort(dist)
     source_locs = source_locs[:, I_dist[::-1]]
 

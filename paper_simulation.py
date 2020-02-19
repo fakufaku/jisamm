@@ -31,7 +31,7 @@ import rrtools
 from get_data import get_data, samples_dir
 from room_builder import random_room_builder, callback_noise_mixer
 
-from arg_generators import exp3_gen_args
+from arg_generators import generate
 
 # Routines for manipulating audio samples
 sys.path.append(samples_dir)
@@ -53,23 +53,13 @@ def one_loop(args):
     return run(args, parameters)
 
 
-def generate_arguments(parameters):
-    """ This will generate the list of arguments to run simulation for """
-
-    if parameters["experiment_name"] == "reverb_interf_performance":
-        return exp3_gen_args(parameters)
-
-    else:
-        raise ValueError("No such experiment!")
-
-
 if __name__ == "__main__":
 
     rrtools.run(
         one_loop,
-        generate_arguments,
+        generate,
         func_init=init,
         base_dir=base_dir,
         results_dir="data/",
-        description="Simulation for Independent Vector Extraction via Iterative SINR Maximization  (submitted to ICASSP 2020)",
+        description="Simulation for OverIVA",
     )

@@ -43,7 +43,7 @@ def run(args, parameters):
     source_signals = wav_read_center(room_params["wav"][:n_sources], seed=123)
 
     # create the room
-    room = pra.ShoeBox(**parameters["room"]["room_kwargs"])
+    room = pra.ShoeBox(**room_params["room_kwargs"])
     R = np.array(room_params["mic_array"])
     room.add_microphone_array(pra.MicrophoneArray(R[:, :n_mics], room.fs))
     source_locs = np.array(room_params["sources"])
