@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Robin Scheibler
+# Copyright (c) 2020 Robin Scheibler
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ of channels.
 import numpy as np
 
 import pyroomacoustics as pra
+from .projection_back import project_back
 from .overiva import overiva
 from .pca import pca
 
@@ -61,16 +62,17 @@ def auxiva_pca(X, n_src=None, return_filters=False, **kwargs):
     if n_src is None:
         n_src = X.shape[2]
 
-    new_X, W_pca = pca(X, return_filters=True)
+    new_X, W_pca = pca(X, n_src=n_src, return_filters=True)
 
     kwargs.pop("proj_back")
     Y, W_iva = overiva(new_X, proj_back=False, return_filters=True, **kwargs)
 
     if "proj_back" in kwargs and kwargs["proj_back"]:
-        z = pra.bss.projection_back(Y, X[:, :, 0])
-        Y *= np.conj(z[None, :, :])
+        Y = project_back(Y, X[:, :, 0])
 
     if return_filters:
-        return Y, W_iva @ W_pca
+        W = W_pca.copy()
+        W[:, :n_src, :] = W_iva @ W_pca[:, :n_src, :]
+        return Y, W
     else:
         return Y

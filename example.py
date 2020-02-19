@@ -22,6 +22,7 @@ Overdetermined Blind Source Separation offline example
 
 This script requires the `mir_eval` to run, and `tkinter` and `sounddevice` packages for the GUI option.
 """
+import argparse
 import sys
 import time
 
@@ -51,9 +52,9 @@ if __name__ == "__main__":
 
     algo_choices = list(bss.algos.keys())
     model_choices = ["laplace", "gauss"]
-    init_choices = ["eye", "eig"]
-
-    import argparse
+    init_choices = ["pca"]
+    ogive_n_iter_default = 2000
+    n_iter_default = 10
 
     parser = argparse.ArgumentParser(
         description="Demonstration of blind source extraction using FIVE."
@@ -82,7 +83,6 @@ if __name__ == "__main__":
         "-i",
         "--init",
         type=str,
-        default=init_choices[0],
         choices=init_choices,
         help="Initialization, eye: identity, eig: principal eigenvectors",
     )
@@ -95,7 +95,7 @@ if __name__ == "__main__":
         "--sinr", type=float, default=5, help="Signal-to-interference-and-noise ratio"
     )
     parser.add_argument(
-        "-n", "--n_iter", type=int, default=11, help="Number of iterations"
+        "-n", "--n_iter", type=int, default=None, help="Number of iterations"
     )
     parser.add_argument(
         "--gui",
@@ -126,10 +126,6 @@ if __name__ == "__main__":
     n_mics = args.mics
     n_sources_target = args.srcs  # the single source case
 
-    # Force an even number of iterations
-    if args.n_iter % 2 == 1:
-        args.n_iter += 1
-
     if bss.is_single_source[args.algo]:
         print("IVE only works with a single source. Using only one source.")
         n_sources_target = 1
@@ -155,12 +151,21 @@ if __name__ == "__main__":
         win_a = pra.hann(framesize)
     win_s = pra.transform.compute_synthesis_window(win_a, hop)
 
-    # algorithm parameters
-    n_iter = args.n_iter
+    # Process number of iterations
+    if args.n_iter is None:
+        if args.algo.startswith("ogive"):
+            n_iter = ogive_n_iter_default
+        else:
+            n_iter = n_iter_default
+    else:
+        n_iter = args.n_iter
+
+    # Force an even number of iterations
+    if n_iter % 2 == 1:
+        n_iter += 1
 
     # param ogive
     ogive_mu = 0.1
-    ogive_iter = 4000
 
     # Geometry of the room and location of sources and microphones
     room_dim = np.array([10, 7.5, 3])
@@ -240,16 +245,18 @@ if __name__ == "__main__":
         )
 
     if args.algo.startswith("ogive"):
-        callback_checkpoints = list(
-            range(1, ogive_iter + ogive_iter // n_iter, ogive_iter // n_iter)
-        )
+        ogive_iter_step = n_iter // 20
+        callback_checkpoints = list(range(1, n_iter + ogive_iter_step, ogive_iter_step))
+    elif not bss.is_iterative[args.algo]:
+        callback_checkpoints = [1]
     else:
         if bss.is_dual_update[args.algo]:
             callback_checkpoints = list(range(2, n_iter + 1, 2))
         else:
             callback_checkpoints = list(range(1, n_iter + 1))
+
     if args.no_cb:
-        callback_checkpoints = []
+        callback_checkpoints = [1]
 
     # START BSS
     ###########
@@ -265,56 +272,24 @@ if __name__ == "__main__":
     # First evaluation of SDR/SIR
     cb_local(X_mics[:, :, :1])
 
-    # Initialization
-    if args.init == "eig":
-        X0 = bss.pca(X_mics)
-    elif args.init == "eye":
-        X0 = X_mics
-    else:
-        raise ValueError("Invalid initialization option")
-
-    # Now run the algorithm
-    if args.algo.startswith("ogive"):
-
-        Y = bss.algos[args.algo](
-            X0,
-            n_iter=ogive_iter,
-            step_size=ogive_mu,
-            proj_back=False,
-            model=args.dist,
-            callback=cb_local,
-            callback_checkpoints=callback_checkpoints,
-        )
-
-    elif bss.is_determined[args.algo] or bss.is_single_source[args.algo]:
-
-        Y = bss.algos[args.algo](
-            X0,
-            n_iter=n_iter,
-            proj_back=False,
-            model=args.dist,
-            callback=cb_local,
-            callback_checkpoints=callback_checkpoints,
-        )
-
-    else:
-
-        Y = bss.algos[args.algo](
-            X0,
-            n_src=n_sources_target,
-            n_iter=n_iter,
-            proj_back=False,
-            model=args.dist,
-            callback=cb_local,
-            callback_checkpoints=callback_checkpoints,
-        )
+    Y = bss.separate(
+        X_mics,
+        algorithm=args.algo,
+        n_src=n_sources_target,
+        proj_back=False,
+        n_iter=n_iter,
+        step_size=ogive_mu,
+        model=args.dist,
+        init=args.init,
+        callback=cb_local,
+        callback_checkpoints=callback_checkpoints,
+    )
 
     # Last evaluation of SDR/SIR
     cb_local(Y)
 
     # projection back
-    z = projection_back(Y, X_mics[:, :, 0])
-    Y *= np.conj(z[None, :, :])
+    Y = bss.project_back(Y, X_mics[:, :, 0])
 
     toc = time.perf_counter()
 
@@ -360,8 +335,9 @@ if __name__ == "__main__":
 
     plt.figure()
     for s in range(n_sources_target):
-        plt.plot([0] + callback_checkpoints, SDR[:, s], label="SDR", marker="*")
-        plt.plot([0] + callback_checkpoints, SIR[:, s], label="SIR", marker="o")
+        plt.plot([0] + callback_checkpoints, SDR[:, s], label=f"SDR {s+1}", marker="*")
+        plt.plot([0] + callback_checkpoints, SIR[:, s], label=f"SIR {s+1}", marker="o")
+    plt.title(args.algo)
     plt.legend()
     plt.tight_layout(pad=0.5)
 
@@ -389,5 +365,7 @@ if __name__ == "__main__":
 
         # Make a simple GUI to listen to the separated samples
         root = Tk()
-        my_gui = PlaySoundGUI(root, room.fs, mix[0, :], y_hat.T, references=refs[:n_sources_target, :])
+        my_gui = PlaySoundGUI(
+            root, room.fs, mix[0, :], y_hat.T, references=refs[:n_sources_target, :]
+        )
         root.mainloop()

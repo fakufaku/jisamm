@@ -27,8 +27,7 @@ IEEE Trans. Signal Process., pp. 1050–1064, Dec. 2018.
 import os
 import numpy as np
 
-from pyroomacoustics.bss import projection_back
-
+from .projection_back import project_back
 from .utils import tensor_H
 
 
@@ -181,8 +180,7 @@ def ogive(
         if callback is not None and epoch in callback_checkpoints:
             Y_tmp = Y.swapaxes(0, 1).copy()
             if proj_back:
-                z = projection_back(Y_tmp, X_ref[:, :, 0])
-                callback(Y_tmp * np.conj(z[None, :, :]))
+                callback(project_back(Y_tmp, X_ref[:, :, 0]))
             else:
                 callback(Y_tmp)
 
@@ -234,8 +232,7 @@ def ogive(
     X = X.swapaxes(0, 1)
 
     if proj_back:
-        z = projection_back(Y, X_ref[:, :, 0])
-        Y *= np.conj(z[None, :, :])
+        Y = project_back(Y, X_ref[:, :, 0])
 
     if return_filters:
         return Y, w

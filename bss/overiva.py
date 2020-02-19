@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2019 Robin Scheibler
+# Copyright (c) 2018-2020 Robin Scheibler
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -69,7 +69,7 @@ References
     than Sources, arXiv, 2019.  https://arxiv.org/abs/1905.07880
 """
 import numpy as np
-from pyroomacoustics.bss.common import projection_back
+from .projection_back import project_back
 
 from .utils import tensor_H, demix, TwoStepsIterator
 from .update_rules import (
@@ -126,6 +126,7 @@ def overiva(
     return_filters=False,
     callback=None,
     callback_checkpoints=[],
+    **kwargs,
 ):
 
     """
@@ -217,8 +218,7 @@ def overiva(
         if callback is not None and epoch in callback_checkpoints:
             Y_tmp = Y.transpose([2, 0, 1])
             if proj_back:
-                z = projection_back(Y_tmp, X_original[:, :, 0])
-                callback(Y_tmp * np.conj(z[None, :, :]))
+                callback(project_back(Y_tmp, X_original[:, :, 0]))
             else:
                 callback(Y_tmp)
 
@@ -295,8 +295,7 @@ def overiva(
     Y = Y.transpose([2, 0, 1]).copy()
 
     if proj_back:
-        z = projection_back(Y, X_original[:, :, 0])
-        Y *= np.conj(z[None, :, :])
+        Y = project_back(Y, X_original[:, :, 0])
 
     if return_filters:
         return Y, W

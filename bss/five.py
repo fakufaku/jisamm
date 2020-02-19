@@ -31,7 +31,7 @@ References
     SINR Maximization, arXiv, 2019.
 """
 import numpy as np
-from pyroomacoustics.bss.common import projection_back
+from .projection_back import project_back
 from scipy import linalg
 
 
@@ -135,8 +135,7 @@ def five(
         if callback is not None and epoch in callback_checkpoints:
             Y_tmp = Y.transpose([2, 0, 1])
             if proj_back:
-                z = projection_back(Y_tmp, X_original[:, :, 0])
-                callback(Y_tmp * np.conj(z[None, :, :]))
+                callback(project_back(Y_tmp, X_original[:, :, 0]))
             else:
                 callback(Y_tmp)
 
@@ -164,7 +163,9 @@ def five(
 
         # Update the output signal
         # note: eigenvalues are in ascending order, we use the smallest
-        Y[:, :, :] = np.matmul(np.conj(R[:, :, :1]).transpose([0, 2, 1]) / np.sqrt(lambda_[:, None, :1]), X)
+        Y[:, :, :] = np.matmul(
+            np.conj(R[:, :, :1]).transpose([0, 2, 1]) / np.sqrt(lambda_[:, None, :1]), X
+        )
 
         if return_filters and epoch == n_iter - 1:
             W = R
@@ -172,8 +173,7 @@ def five(
     Y = Y.transpose([2, 0, 1]).copy()
 
     if proj_back:
-        z = projection_back(Y, X_original[:, :, 0])
-        Y *= np.conj(z[None, :, :])
+        Y = project_back(Y, X_original[:, :, 0])
 
     if return_filters:
         return Y, W @ np.linalg.inv(Q_H)
