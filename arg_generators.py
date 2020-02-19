@@ -9,13 +9,13 @@ from room_builder import (
     random_locations,
     convergence_callback,
 )
-from samples import sampling
+from samples.generate_samples import sampling
 
 
 def exp3_gen_args(config):
 
     # infer a few arguments
-    room_dim = config["room"]["room_kwargs"]["room_dim"]
+    room_dim = config["room"]["room_kwargs"]["p"]
     mic_array_center = np.array(config["room"]["mic_array_location_m"])
     mic_array = mic_array_center[None, :] + np.array(
         config["room"]["mic_array_geometry_m"]
@@ -29,7 +29,7 @@ def exp3_gen_args(config):
     gen_files_seed = int(np.random.randint(2 ** 32, dtype=np.uint32))
     all_wav_files = sampling(
         config["repeat"],
-        np.max(config["targets"]) + np.max(config["interferers"]),
+        np.max(config["n_targets"]) + np.max(config["n_interferers"]),
         config["samples_list"],
         gender_balanced=True,
         seed=gen_files_seed,
@@ -64,8 +64,8 @@ def exp3_gen_args(config):
 
     args = []
     for sinr in config["sinr"]:
-        for n_targets in config["targets"]:
-            for n_interf in config["interferers"]:
+        for n_targets in config["n_targets"]:
+            for n_interf in config["n_interferers"]:
                 for dist_ratio in config["dist_crit_ratio"]:
                     for r in range(config["repeat"]):
 

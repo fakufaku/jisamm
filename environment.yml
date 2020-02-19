@@ -1,4 +1,4 @@
-name: 2019_scheibler_five
+name: 2020_scheibler_overiva
 dependencies:
   - python=3.7
   - numpy
@@ -11,7 +11,7 @@ dependencies:
   - pip:
     - seaborn==0.9.0
     - gitpython
-    - pyroomacoustics==0.2.0
+    - pyroomacoustics==0.3.1
     - sounddevice
     - samplerate
     - mir_eval
