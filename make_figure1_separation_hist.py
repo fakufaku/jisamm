@@ -229,7 +229,7 @@ if __name__ == "__main__":
 
     for ext in ["pdf", "png"]:
         fig_fn = os.path.join(
-            fig_dir, f"figure3_{m_name}_interf{n_interferers}_sinr{sinr}.{ext}"
+            fig_dir, f"figure1_{m_name}_interf{n_interferers}_sinr{sinr}.{ext}"
         )
         plt.savefig(fig_fn, bbox_extra_artists=all_artists, bbox_inches="tight")
     plt.close()

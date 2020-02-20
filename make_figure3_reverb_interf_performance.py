@@ -180,7 +180,7 @@ if __name__ == "__main__":
 
         fg = sns.FacetGrid(df_agg, col="SINR", row="Algorithm")
         fg.map_dataframe(
-            draw_heatmap, "Interferers", "Distance", "value", cbar=False, vmin=0., vmax=1.# square=True
+            draw_heatmap, "Interferers", "Distance", "value", cbar=False, vmin=0., vmax=1.  # square=True
         )
 
         PCM=ax.get_children()[0]
