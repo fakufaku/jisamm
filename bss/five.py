@@ -41,7 +41,7 @@ def five(
     proj_back=True,
     W0=None,
     model="laplace",
-    init_eig=True,
+    init_eig=False,
     return_filters=False,
     callback=None,
     callback_checkpoints=[],
@@ -109,7 +109,7 @@ def five(
 
     # We will need the inverse square root of Cx
     e_val, e_vec = np.linalg.eigh(Cx)
-    Q_H = e_vec[:, :, ::-1] * np.sqrt(e_val[:, None, ::-1])
+    Q_H = e_vec[:, :, :] * np.sqrt(e_val[:, None, :])
 
     eps = 1e-10
     V = np.zeros((n_freq, n_chan, n_chan), dtype=X.dtype)
@@ -125,7 +125,7 @@ def five(
     # initialize the output signal
     if init_eig:
         # Principal component
-        Y = X[:, :1, :].copy()
+        Y = X[:, -1:, :].copy()
     else:
         # First microphone
         Y = X_original[:, :, :1].transpose([1, 2, 0]).copy()
