@@ -125,8 +125,9 @@ def run(args, parameters):
         name = params["algo"]
         kwargs = params["kwargs"]
 
-        if bss.is_dual_update[name] and n_targets == 1:
-            # doesn't work for single source scenario
+        if not bss.is_determined[name] and bss.is_dual_update[name] and n_targets == 1:
+            # Overdetermined algorithms with dual updates cannot be used
+            # in the single source case (they can extract at least two sources)
             continue
         elif bss.is_single_source[name] and n_targets > 1:
             # doesn't work for multi source scenario
