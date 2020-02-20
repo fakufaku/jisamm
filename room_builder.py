@@ -46,7 +46,7 @@ def random_locations(
     return sources
 
 
-def choose_target_locations(n_sources, mic_array_location, distance):
+def choose_target_locations(n_sources, mic_array_location, distance, rot=None):
     # make the sources circular around the center of the array
     # in the horizontal plane
 
@@ -56,6 +56,11 @@ def choose_target_locations(n_sources, mic_array_location, distance):
     circ_points = np.array(
         [[np.cos(angle(n)), np.sin(angle(n)), 0.0] for n in range(n_sources)]
     ).T
+
+    # Apply the rotation in the x-y plane, if requested
+    if rot is not None:
+        rot_mat = np.array([[np.cos(rot), np.sin(rot)], [-np.sin(rot), np.cos(rot)]])
+        circ_points[:2, :] = rot_mat @ circ_points[:2, :]
 
     return mic_array_location[:, None] + circ_points * distance
 

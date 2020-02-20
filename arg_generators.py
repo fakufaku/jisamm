@@ -163,13 +163,17 @@ def exp2_gen_args(config):
 
     # create all distinct target locations
     target_locs = {}
-    for n in config["n_targets"]:
-        target_locs[n] = {}
-        for dist_ratio in config["dist_crit_ratio"]:
-            dist_mic_target = dist_ratio * critical_distance
-            target_locs[n][dist_ratio] = choose_target_locations(
-                n, mic_array_center, dist_mic_target
-            ).tolist()
+    for r in range(config["repeat"]):
+        # pick rotation
+        random_rot = np.random.rand() * 2 * np.pi
+        target_locs[r] = {}
+        for n in config["n_targets"]:
+            target_locs[r][n] = {}
+            for dist_ratio in config["dist_crit_ratio"]:
+                dist_mic_target = dist_ratio * critical_distance
+                target_locs[r][n][dist_ratio] = choose_target_locations(
+                    n, mic_array_center, dist_mic_target
+                ).tolist()
 
     args = []
     for sinr in config["sinr"]:
@@ -187,7 +191,7 @@ def exp2_gen_args(config):
                                 "mic_array": mic_array.tolist(),
                                 "sources": np.concatenate(
                                     (
-                                        target_locs[n_targets][dist_ratio],
+                                        target_locs[r][n_targets][dist_ratio],
                                         interferers_locs[r],
                                     ),
                                     axis=1,
