@@ -114,7 +114,16 @@
     },
     "auxiva_pca" : {
       "algo" : "auxiva-pca",
-      "kwargs" : { }
+      "kwargs" : {
+        "n_iter" : 50,
+        "model" : "laplace",
+        "init": "pca",
+        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+      }
+    },
+    "pca" : {
+      "algo": "pca",
+      "kwargs": {}
     }
   }
 }

@@ -147,92 +147,43 @@ if __name__ == "__main__":
     full_width = 6.93  # inches, == 17.6 cm, double column width
     half_width = 3.35  # inches, == 8.5 cm, single column width
 
-    # Third figure
-    # Classic # of microphones vs metric (box-plots ?)
-    the_metrics = {
-        "improvements": ["\u0394SI-SDR [dB]", "\u0394SI-SIR [dB]"],
-        "raw": ["SI-SDR [dB]", "SI-SIR [dB]"],
-    }
-
-    # width = aspect * height
-    aspect = 4 / 2  # width / height
-    height = full_width / aspect
-
-    all_algos_fig3 = all_algos
-
+    # Second figure
+    # Convergence curves: Time/Iteration vs SDR
+    aspect = 0.9
+    height = ((full_width - 0.8) / len(parameters["sinr"])) / aspect
     sinr = 5
-    iteration_index = 12
     n_interferers = 10
-    m_name = "improvements"
-    metric = the_metrics[m_name]
 
-    select = (
-        np.logical_or(df_melt["Iteration_Index"] == iteration_index, df_melt["Iteration"] == 10)
-        & (df_melt["Interferers"] == n_interferers)
-        & (df_melt["SINR"] == sinr)
-        & df_melt.metric.isin(metric)
-    )
+    for key, metric in {"sisdr": "\u0394SI-SDR [dB]", "sisir": "\u0394SI-SDR [dB]"}.items():
 
-    fig = plt.figure()
-    g = sns.catplot(
-        data=df_melt[select],
-        x="Mics",
-        y="value",
-        hue="Algorithm",
-        row="Sources",
-        col="metric",
-        col_order=metric,
-        hue_order=all_algos_fig3,
-        kind="violin",
-        legend=False,
-        aspect=aspect,
-        height=height,
-        linewidth=0.5,
-        fliersize=0.3,
-        whis=np.inf,
-        sharey="row",
-        # size=3, aspect=0.65,
-        # margin_titles=True,
-    )
-
-    g.set(clip_on=False) #, ylim=[-1, 14])
-    # remove original titles before adding custom ones
-    [plt.setp(ax.texts, text="") for ax in g.axes.flat]
-    g.set_titles(col_template="{col_name}", row_template="{row_name} Sources")
-
-    all_artists = []
-
-    # left_ax = g.facet_axis(2, 0)
-    left_ax = g.facet_axis(0, 0)
-    leg = left_ax.legend(
-        title="Algorithms",
-        frameon=True,
-        framealpha=0.85,
-        fontsize="x-small",
-        loc="upper left",
-        bbox_to_anchor=[-0.08, 1.08],
-    )
-    leg.get_frame().set_linewidth(0.2)
-    all_artists.append(leg)
-
-    sns.despine(offset=10, trim=False, left=True, bottom=True)
-
-    plt.tight_layout(pad=0.5)
-
-    g.facet_axis(0, 0).set_ylabel("")
-
-    """
-    for c, lbl in enumerate(metric):
-        g_ax = g.facet_axis(0, c)
-        g_ax.set_ylabel(lbl)
-    """
-
-    for ext in ["pdf", "png"]:
-        fig_fn = os.path.join(
-            fig_dir, f"figure3_{m_name}_interf{n_interferers}_sinr{sinr}.{ext}"
+        select = np.logical_and(
+            df_agg["SINR"] == sinr, df_agg["metric"] == metric
         )
-        plt.savefig(fig_fn, bbox_extra_artists=all_artists, bbox_inches="tight")
-    plt.close()
+        select = np.logical_and(select, df_agg["Interferers"] == n_interferers)
+
+        # select = np.logical_and(df_agg["Interferers"] == 5, select)
+        g = sns.FacetGrid(
+            df_agg[select],
+            row="Sources",
+            col="Mics",
+            hue="Algorithm",
+            hue_order=all_algos,
+            hue_kws=dict(
+                # marker=["o", "o", "s", "s", "d", "d", "^", "^"],
+                # linewidth=[1.0, 0.5, 1.0, 0.5, 1.0, 0.5, 1.0, 0.5],
+            ),
+            # aspect=aspect,
+            # height=height,
+            xlim=[0.0, 1.],
+            ylim=[-5, 25],
+        )
+        g.map(plt.plot, "Runtime [s]", "value", markersize=1.5)
+        g.despine(left=True).set_ylabels(metric).add_legend(fontsize="x-small")
+
+        for ext in ["pdf", "png"]:
+            fig_fn = os.path.join(fig_dir, f"figure2_conv_interf{n_interferers}_sinr{sinr}_metric{key}.{ext}")
+            plt.savefig(fig_fn, bbox_inches="tight")
+        plt.close()
 
     if plot_flag:
         plt.show()
