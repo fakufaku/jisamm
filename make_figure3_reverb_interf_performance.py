@@ -54,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         "--show",
-        action="store_true",
+        action="store_false",
         help="Display the plots at the end of data analysis",
     )
     parser.add_argument(
@@ -148,91 +148,51 @@ if __name__ == "__main__":
     half_width = 3.35  # inches, == 8.5 cm, single column width
 
     # Third figure
-    # Classic # of microphones vs metric (box-plots ?)
-    the_metrics = {
-        "improvements": ["\u0394SI-SDR [dB]", "\u0394SI-SIR [dB]"],
-        "raw": ["SI-SDR [dB]", "SI-SIR [dB]"],
-    }
 
     # width = aspect * height
-    aspect = 4 / 2  # width / height
+    aspect = 1  # width / height
     height = full_width / aspect
 
     all_algos_fig3 = all_algos
 
-    sinr = 5
-    iteration_index = 12
-    n_interferers = 10
-    m_name = "improvements"
-    metric = the_metrics[m_name]
+    for n_targets in parameters["n_targets"]:
 
-    select = (
-        np.logical_or(df_melt["Iteration_Index"] == iteration_index, df_melt["Iteration"] == 10)
-        & (df_melt["Interferers"] == n_interferers)
-        & (df_melt["SINR"] == sinr)
-        & df_melt.metric.isin(metric)
-    )
+        print("# Targets:", n_targets)
 
-    fig = plt.figure()
-    g = sns.catplot(
-        data=df_melt[select],
-        x="Mics",
-        y="value",
-        hue="Algorithm",
-        row="Sources",
-        col="metric",
-        col_order=metric,
-        hue_order=all_algos_fig3,
-        kind="violin",
-        legend=False,
-        aspect=aspect,
-        height=height,
-        linewidth=0.5,
-        fliersize=0.3,
-        whis=np.inf,
-        sharey="row",
-        # size=3, aspect=0.65,
-        # margin_titles=True,
-    )
-
-    g.set(clip_on=False) #, ylim=[-1, 14])
-    # remove original titles before adding custom ones
-    [plt.setp(ax.texts, text="") for ax in g.axes.flat]
-    g.set_titles(col_template="{col_name}", row_template="{row_name} Sources")
-
-    all_artists = []
-
-    # left_ax = g.facet_axis(2, 0)
-    left_ax = g.facet_axis(0, 0)
-    leg = left_ax.legend(
-        title="Algorithms",
-        frameon=True,
-        framealpha=0.85,
-        fontsize="x-small",
-        loc="upper left",
-        bbox_to_anchor=[-0.08, 1.08],
-    )
-    leg.get_frame().set_linewidth(0.2)
-    all_artists.append(leg)
-
-    sns.despine(offset=10, trim=False, left=True, bottom=True)
-
-    plt.tight_layout(pad=0.5)
-
-    g.facet_axis(0, 0).set_ylabel("")
-
-    """
-    for c, lbl in enumerate(metric):
-        g_ax = g.facet_axis(0, c)
-        g_ax.set_ylabel(lbl)
-    """
-
-    for ext in ["pdf", "png"]:
-        fig_fn = os.path.join(
-            fig_dir, f"figure1_{m_name}_interf{n_interferers}_sinr{sinr}.{ext}"
+        select = (
+            (df_melt["Iteration_Index"] == 1)
+            & (df_melt["Sources"] == n_targets)
+            & (df_melt["metric"] == "Success")
         )
-        plt.savefig(fig_fn, bbox_extra_artists=all_artists, bbox_inches="tight")
-    plt.close()
+
+        df_agg = df_melt[select]
+
+        def draw_heatmap(*args, **kwargs):
+            global ax
+            data = kwargs.pop("data")
+            d = data.pivot_table(
+                index=args[1], columns=args[0], values=args[2], aggfunc=np.mean
+            )
+            # import pdb; pdb.set_trace()
+            print(d)
+            sns.heatmap(d, **kwargs)
+            ax = plt.gca()
+
+        fg = sns.FacetGrid(df_agg, col="SINR", row="Algorithm")
+        fg.map_dataframe(
+            draw_heatmap, "Interferers", "Distance", "value", cbar=False, vmin=0., vmax=1.  # square=True
+        )
+
+        PCM=ax.get_children()[0]
+        cbar_ax = fg.fig.add_axes([1.015,0.2, 0.015, 0.6])
+        plt.colorbar(PCM, cax=cbar_ax)
+
+        for ext in ["pdf", "png"]:
+            fig_fn = os.path.join(fig_dir, f"figure3_success_tgt{n_targets}.{ext}")
+            # plt.savefig(fig_fn, bbox_extra_artists=all_artists, bbox_inches="tight")
+            plt.savefig(fig_fn, bbox_inches="tight")
+
+        plt.close()
 
     if plot_flag:
         plt.show()

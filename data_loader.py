@@ -127,17 +127,22 @@ def load_data(dirs, pickle=False):
 
             rt60_list.append(record["rt60"])
 
+            try:
+                fs = parameters["room_params"]["fs"]
+            except KeyError:
+                fs = parameters["room"]["room_kwargs"]["fs"]
+
             # runtime per iteration, per second of audio
             runtime = (
                 record["runtime"]
                 / record["n_samples"]
-                * parameters["room_params"]["fs"]
+                * fs
                 / algo_n_iter
             )
             evaltime = (
                 record["eval_time"]
                 / record["n_samples"]
-                * parameters["room_params"]["fs"]
+                * fs
                 / algo_n_iter
             )
 
