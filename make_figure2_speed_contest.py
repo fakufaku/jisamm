@@ -154,7 +154,7 @@ if __name__ == "__main__":
     sinr = 5
     n_interferers = 10
 
-    for key, metric in {"sisdr": "\u0394SI-SDR [dB]", "sisir": "\u0394SI-SDR [dB]"}.items():
+    for key, metric in {"sisdr": "\u0394SI-SDR [dB]", "sisir": "\u0394SI-SIR [dB]"}.items():
 
         select = np.logical_and(
             df_agg["SINR"] == sinr, df_agg["metric"] == metric
