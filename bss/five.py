@@ -31,9 +31,11 @@ References
     SINR Maximization, arXiv, 2019.
 """
 import numpy as np
+from scipy import linalg
+
 from .projection_back import project_back
 from .utils import tensor_H
-from scipy import linalg
+from . import default
 
 
 def five(
@@ -41,7 +43,7 @@ def five(
     n_iter=3,
     proj_back=True,
     W0=None,
-    model="laplace",
+    model=default.model,
     init_eig=False,
     return_filters=False,
     callback=None,

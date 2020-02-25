@@ -120,7 +120,6 @@ def load_data(dirs, pickle=False):
             if "callback_checkpoints" in algo_kwargs:
                 checkpoints = algo_kwargs["callback_checkpoints"].copy()
                 checkpoints.insert(0, 0)
-                checkpoints.append(algo_kwargs["n_iter"])
                 algo_n_iter = algo_kwargs["n_iter"]
             else:
                 checkpoints = list(range(len(record["sdr"])))
