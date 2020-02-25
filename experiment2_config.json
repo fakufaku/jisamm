@@ -34,13 +34,22 @@
 
   "stft_params" : {
     "framesize" : 4096,
-    "hop" : 2048,
+    "hop" : 1024,
     "window": "hamming"
   },
 
   "algorithm_kwargs" : {
     "five_laplace" : {
       "algo" : "five",
+      "kwargs" : {
+        "n_iter" : 50,
+        "model" : "laplace",
+        "init": "pca",
+        "callback_checkpoints" : []
+      }
+    },
+    "overiva_ip_laplace" : {
+      "algo" : "overiva-ip",
       "kwargs" : {
         "n_iter" : 50,
         "model" : "laplace",
