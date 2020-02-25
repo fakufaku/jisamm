@@ -24,6 +24,7 @@ This script requires the `mir_eval` to run, and `tkinter` and `sounddevice` pack
 """
 import argparse
 import sys
+import json
 import time
 
 import matplotlib
@@ -38,9 +39,8 @@ from room_builder import callback_noise_mixer, convergence_callback
 from scipy.io import wavfile
 
 import bss
-
-from get_data import samples_dir
 from samples.generate_samples import sampling, wav_read_center
+from room_builder import random_locations, choose_target_locations
 
 # Once we are sure the data is there, import some methods
 # to select and read samples
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     algo_choices = list(bss.algos.keys())
     model_choices = ["laplace", "gauss"]
     init_choices = ["pca"]
-    ogive_n_iter_default = 2000
+    ogive_n_iter_default = 1000
     n_iter_default = 10
 
     parser = argparse.ArgumentParser(
@@ -107,6 +107,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Saves the output of the separation to wav files",
     )
+    parser.add_argument("--seed", type=int, help="Random number generator seed")
     args = parser.parse_args()
 
     if args.gui:
@@ -131,7 +132,13 @@ if __name__ == "__main__":
         n_sources_target = 1
 
     # fix the randomness for repeatability
-    np.random.seed(30)
+    if args.seed is None:
+        seed = np.random.randint(2 ** 32)
+    else:
+        seed = args.seed
+    print(f"The RNG seed is {seed}")
+
+    np.random.seed(seed)
 
     # set the source powers, the first one is half
     source_std = np.ones(n_sources_target)
@@ -139,10 +146,12 @@ if __name__ == "__main__":
     SINR = args.sinr  # signal-to-interference-and-noise ratio
     SINR_diffuse_ratio = 0.9999  # ratio of uncorrelated to diffuse noise
     ref_mic = 0  # the reference microphone for SINR and projection back
+    # the distance between microphone array and targets as a ratio to the critical distance
+    dist_ratio = 0.5
 
     # STFT parameters
     framesize = 4096
-    hop = framesize // 2
+    hop = framesize // 4
     window = "hamming"
     stft_params = {"framesize": framesize, "hop": hop, "window": window}
     if stft_params["window"] == "hann":
@@ -168,27 +177,40 @@ if __name__ == "__main__":
     ogive_mu = 0.1
 
     # Geometry of the room and location of sources and microphones
-    room_dim = np.array([10, 7.5, 3])
-    mic_locs = semi_circle_layout(
-        [4.1, 3.76, 1.2], np.pi, 0.20, n_mics, rot=np.pi / 2.0 * 0.99
-    )
+    # Use the room model from experiment 2
+    with open("experiment2_config.json", "r") as f:
+        config = json.load(f)
 
-    target_locs = semi_circle_layout(
-        [4.1, 3.755, 1.1], np.pi / 2, 2.0, n_sources_target, rot=0.743 * np.pi
+    room_dim = config["room"]["room_kwargs"]["p"]
+    mic_array_center = np.array(config["room"]["mic_array_location_m"])
+    angles = np.arange(n_mics - 1) * 2 * np.pi / (n_mics - 1)
+    rel_mics_locs = np.vstack(
+        [
+            np.concatenate(([0.], 0.02 * np.cos(angles))),
+            np.concatenate(([0.], 0.02 * np.sin(angles))),
+            np.zeros(n_mics),
+        ]
     )
-    interferer_locs = random_layout(
-        [3.0, 5.5, 1.5], n_sources - n_sources_target, offset=[6.5, 1.0, 0.5], seed=1234
+    mic_locs = mic_array_center[:, None] + rel_mics_locs
+    critical_distance = config["room"]["critical_distance_m"]
+
+    # all source locations
+    target_locs = choose_target_locations(
+        args.srcs, mic_array_center, dist_ratio * critical_distance
     )
-    source_locs = np.concatenate((target_locs, interferer_locs), axis=1)
+    interferers_locs = random_locations(
+        args.interf, room_dim, mic_array_center, min_dist=critical_distance
+    )
+    source_locs = np.concatenate((target_locs, interferers_locs), axis=1)
 
     # Prepare the signals
     wav_files = sampling(
-        1, n_sources, f"{samples_dir}/metadata.json", gender_balanced=True, seed=2222
+        1, n_sources, f"{samples_dir}/metadata.json", gender_balanced=True, seed=np.random.randint(2 ** 32),
     )[0]
     signals = wav_read_center(wav_files, seed=123)
 
     # Create the room itself
-    room = pra.ShoeBox(room_dim, fs=fs, absorption=absorption, max_order=max_order)
+    room = pra.ShoeBox(**config["room"]["room_kwargs"])
 
     # Place a source of white noise playing for 5 s
     for sig, loc in zip(signals, source_locs.T):
@@ -227,15 +249,18 @@ if __name__ == "__main__":
     # Monitor Convergence
     #####################
 
-    SDR, SIR, eval_time = [], [], []
+    SDR, SIR, cost_list, eval_time = [], [], [], []
 
-    def cb_local(Y):
+    def cb_local(W, Y, source_model):
         convergence_callback(
+            W,
             Y,
+            source_model,
             X_mics,
             n_sources_target,
             SDR,
             SIR,
+            cost_list,
             eval_time,
             refs,
             ref_mic,
@@ -246,7 +271,7 @@ if __name__ == "__main__":
 
     if args.algo.startswith("ogive"):
         ogive_iter_step = n_iter // 20
-        callback_checkpoints = list(range(1, n_iter + ogive_iter_step, ogive_iter_step))
+        callback_checkpoints = list(range(ogive_iter_step, n_iter + ogive_iter_step, ogive_iter_step))
     elif not bss.is_iterative[args.algo]:
         callback_checkpoints = [1]
     else:
@@ -270,23 +295,21 @@ if __name__ == "__main__":
     tic = time.perf_counter()
 
     # First evaluation of SDR/SIR
-    cb_local(X_mics[:, :, :1])
+    cb_local(np.eye(n_mics)[None, :, :], X_mics[:, :, :1], args.dist)
 
-    Y = bss.separate(
+    Y, W = bss.separate(
         X_mics,
         algorithm=args.algo,
         n_src=n_sources_target,
         proj_back=False,
         n_iter=n_iter,
+        return_filters=True,
         step_size=ogive_mu,
         model=args.dist,
         init=args.init,
         callback=cb_local,
         callback_checkpoints=callback_checkpoints,
     )
-
-    # Last evaluation of SDR/SIR
-    cb_local(Y)
 
     # projection back
     Y = bss.project_back(Y, X_mics[:, :, 0])
@@ -321,6 +344,8 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
+    room.plot(img_order=0)
+
     plt.figure()
 
     plt.subplot(2, 1, 1)
@@ -331,6 +356,13 @@ if __name__ == "__main__":
     plt.specgram(y_hat[:, 0], NFFT=1024, Fs=room.fs)
     plt.title("Extracted source")
 
+    plt.tight_layout(pad=0.5)
+
+    plt.figure()
+    plt.plot([0] + callback_checkpoints, cost_list)
+    plt.title("Cost function")
+    plt.xlabel("Iteration")
+    plt.ylabel("Cost")
     plt.tight_layout(pad=0.5)
 
     plt.figure()

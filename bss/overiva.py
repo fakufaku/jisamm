@@ -214,14 +214,6 @@ def overiva(
 
     for epoch in range(0, n_iter, iter_step):
 
-        # Monitor the algorithm progression
-        if callback is not None and epoch in callback_checkpoints:
-            Y_tmp = Y.transpose([2, 0, 1])
-            if proj_back:
-                callback(project_back(Y_tmp, X_original[:, :, 0]))
-            else:
-                callback(Y_tmp)
-
         # update the source model
         # shape: (n_src, n_frames)
         if model == "laplace":
@@ -291,6 +283,11 @@ def overiva(
             raise ValueError("Invalid update rules")
 
         demix(Y, X, W[:, :n_src, :])
+
+        # Monitor the algorithm progression
+        if callback is not None and (epoch + 1) in callback_checkpoints:
+            Y_tmp = Y.transpose([2, 0, 1])
+            callback(W, Y_tmp, model)
 
     Y = Y.transpose([2, 0, 1]).copy()
 

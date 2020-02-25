@@ -106,20 +106,6 @@ def run(args, parameters):
     init_sdr = []
     init_sir = []
 
-    convergence_callback(
-        X_mics,
-        X_mics,
-        n_targets,
-        init_sdr,
-        init_sir,
-        [],
-        refs,
-        parameters["mix_params"]["ref_mic"],
-        parameters["stft_params"],
-        "init",
-        False,
-    )
-
     for full_name, params in parameters["algorithm_kwargs"].items():
 
         name = params["algo"]
@@ -148,6 +134,7 @@ def run(args, parameters):
                 "seed": seed,
                 "sdr": [],
                 "sir": [],  # to store the result
+                "cost": [],
                 "runtime": np.nan,
                 "eval_time": np.nan,
                 "n_samples": n_samples,
@@ -157,13 +144,16 @@ def run(args, parameters):
         # this is used to keep track of time spent in the evaluation callback
         eval_time = []
 
-        def cb(Y):
+        def cb(W, Y, source_model):
             convergence_callback(
+                W,
                 Y,
+                source_model,
                 X_mics,
                 n_targets,
                 results[-1]["sdr"],
                 results[-1]["sir"],
+                results[-1]["cost"],
                 eval_time,
                 refs,
                 parameters["mix_params"]["ref_mic"],
@@ -172,14 +162,17 @@ def run(args, parameters):
                 not bss.is_determined[name],
             )
 
-        # avoid one computation by using the initial values of sdr/sir
-        results[-1]["sdr"].append(init_sdr[0])
-        results[-1]["sir"].append(init_sir[0])
+        if "model" not in kwargs:
+            local_model = bss.default_model
+        else:
+            local_model = kwargs["model"]
+
+        cb(np.eye(n_mics)[None, :, :], X_mics, local_model)
 
         try:
             t_start = time.perf_counter()
 
-            Y = bss.separate(
+            bss.separate(
                 X_mics,
                 n_src=n_targets,
                 algorithm=name,
@@ -189,21 +182,6 @@ def run(args, parameters):
             )
 
             t_finish = time.perf_counter()
-
-            # The last evaluation
-            convergence_callback(
-                Y,
-                X_mics,
-                n_targets,
-                results[-1]["sdr"],
-                results[-1]["sir"],
-                [],
-                refs,
-                parameters["mix_params"]["ref_mic"],
-                parameters["stft_params"],
-                name,
-                not bss.is_determined[name],
-            )
 
             results[-1]["eval_time"] = np.sum(eval_time)
             results[-1]["runtime"] = t_finish - t_start - results[-1]["eval_time"]

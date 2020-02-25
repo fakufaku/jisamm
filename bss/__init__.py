@@ -35,6 +35,7 @@ from .five import five
 from .pca import pca
 from .auxiva_pca import auxiva_pca
 from .ogive import ogive, ogive_mix, ogive_demix, ogive_switch
+from .utils import cost_iva
 
 from .projection_back import project_back
 

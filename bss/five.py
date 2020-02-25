@@ -32,6 +32,7 @@ References
 """
 import numpy as np
 from .projection_back import project_back
+from .utils import tensor_H
 from scipy import linalg
 
 
@@ -45,7 +46,6 @@ def five(
     return_filters=False,
     callback=None,
     callback_checkpoints=[],
-    cost_callback=None,
     **kwargs,
 ):
 
@@ -82,9 +82,6 @@ def five(
         convergence
     callback_checkpoints: list of int
         A list of epoch number when the callback should be called
-    cost_callback: func
-        When this callback function is specified, it will be called with
-        the value of the cost function as argument
 
     Returns
     -------
@@ -94,9 +91,6 @@ def five(
     """
 
     n_frames, n_freq, n_chan = X.shape
-
-    def tensor_H(A):
-        return np.conj(A.swapaxes(1, 2))
 
     # default to determined case
     n_src = 1
@@ -109,7 +103,8 @@ def five(
 
     # We will need the inverse square root of Cx
     e_val, e_vec = np.linalg.eigh(Cx)
-    Q_H = e_vec[:, :, :] * np.sqrt(e_val[:, None, :])
+    Q_H_inv = (1.0 / np.sqrt(e_val[:, :, None])) * tensor_H(e_vec)
+    # Q_H = e_vec[:, :, :] * np.sqrt(e_val[:, None, :])
 
     eps = 1e-10
     V = np.zeros((n_freq, n_chan, n_chan), dtype=X.dtype)
@@ -120,7 +115,8 @@ def five(
     X_original = X.copy()
 
     # pre-whiten the input signal
-    X = np.linalg.solve(Q_H, X.transpose([1, 2, 0]))
+    # X = np.linalg.solve(Q_H, X.transpose([1, 2, 0]))
+    X = Q_H_inv @ X.transpose([1, 2, 0])
 
     # initialize the output signal
     if init_eig:
@@ -132,15 +128,7 @@ def five(
 
     for epoch in range(n_iter):
 
-        if callback is not None and epoch in callback_checkpoints:
-            Y_tmp = Y.transpose([2, 0, 1])
-            if proj_back:
-                callback(project_back(Y_tmp, X_original[:, :, 0]))
-            else:
-                callback(Y_tmp)
-
-        # Update now the demixing matrix
-
+        # update the source model
         # shape: (n_frames, n_src)
         if model == "laplace":
             r_inv = 1.0 / np.maximum(eps, 2.0 * np.linalg.norm(Y[:, 0, :], axis=0))
@@ -151,24 +139,25 @@ def five(
 
         # Compute Auxiliary Variable
         # shape: (n_freq, n_chan, n_chan)
-        V[:, :, :] = np.matmul(
-            (X * r_inv[None, None, :]), np.conj(X.swapaxes(1, 2)) / n_frames
-        )
+        V[:, :, :] = (X * r_inv[None, None, :]) @ np.conj(X.swapaxes(1, 2)) / n_frames
 
         # Solve the Eigenvalue problem
         # We only need the smallest eigenvector and eigenvalue,
         # so we could solve this more efficiently, but it is faster to
         # just solve everything rather than wrap this in a for loop
         lambda_, R = np.linalg.eigh(V)
+        R[:, :, :1] /= np.sqrt(lambda_[:, None, :1])
 
         # Update the output signal
         # note: eigenvalues are in ascending order, we use the smallest
-        Y[:, :, :] = np.matmul(
-            np.conj(R[:, :, :1]).transpose([0, 2, 1]) / np.sqrt(lambda_[:, None, :1]), X
-        )
+        Y[:, :, :] = np.matmul(tensor_H(R[:, :, :1]), X)
 
         if return_filters and epoch == n_iter - 1:
-            W = R
+            W = tensor_H(R)
+
+        if callback is not None and (epoch + 1) in callback_checkpoints:
+            Y_tmp = Y.transpose([2, 0, 1])
+            callback(tensor_H(R) @ Q_H_inv, Y_tmp, model)
 
     Y = Y.transpose([2, 0, 1]).copy()
 
@@ -176,6 +165,6 @@ def five(
         Y = project_back(Y, X_original[:, :, 0])
 
     if return_filters:
-        return Y, W @ np.linalg.inv(Q_H)
+        return Y, W @ Q_H_inv
     else:
         return Y

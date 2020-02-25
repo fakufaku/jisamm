@@ -8,6 +8,7 @@ import pyroomacoustics as pra
 from pyroomacoustics.bss import projection_back
 from numpy.random import rand
 
+import bss
 from metrics import si_bss_eval
 
 
@@ -62,11 +63,14 @@ def choose_target_locations(n_sources, mic_array_location, distance):
 
 # convergence monitoring callback
 def convergence_callback(
+    W,
     Y,
+    source_model,
     X,
     n_targets,
     SDR,
     SIR,
+    cost_list,
     eval_time,
     ref_sig,
     ref_mic,
@@ -76,6 +80,9 @@ def convergence_callback(
 ):
     # we will keep track of how long this routine takes
     t_in = time.perf_counter()
+
+    # Compute the current value of the IVA cost function
+    cost_list.append(bss.cost_iva(W, Y, model=source_model))
 
     # prepare STFT parameters
     framesize = stft_params["framesize"]
@@ -87,8 +94,7 @@ def convergence_callback(
     win_s = pra.transform.compute_synthesis_window(win_a, hop)
 
     # projection back
-    z = projection_back(Y, X[:, :, 0])
-    Y = Y * np.conj(z[None, :, :])
+    Y = bss.project_back(Y, X[:, :, 0])
 
     if Y.shape[2] == 1:
         y = pra.transform.synthesis(Y[:, :, 0], framesize, hop, win=win_s)[:, None]

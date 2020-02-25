@@ -24,7 +24,7 @@
 
   "stft_params" : {
     "framesize" : 4096,
-    "hop" : 2048,
+    "hop" : 1024,
     "window": "hamming"
   },
 
@@ -35,7 +35,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "overiva_ip_laplace" : {
@@ -44,7 +44,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "overiva_ip2_laplace" : {
@@ -53,7 +53,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "overiva_ip_block_laplace" : {
@@ -62,7 +62,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 50]
       }
     },
     "overiva_ip2_block_laplace" : {
@@ -71,7 +71,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "overiva_demix_bg_laplace" : {
@@ -80,7 +80,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "ogive_laplace" : {
@@ -91,7 +91,7 @@
         "tol": 1e-3,
         "model": "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 20, 40, 60, 80, 120, 160, 200, 400, 600, 800]
+        "callback_checkpoints" : [20, 40, 60, 80, 120, 160, 200, 400, 600, 800, 1000]
       }
     },
     "auxiva_laplace" : {
@@ -100,7 +100,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "auxiva2_laplace" : {
@@ -109,7 +109,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "auxiva_pca" : {
@@ -118,7 +118,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [0, 1, 2, 3, 4, 6, 8, 10, 20, 30, 40]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "pca" : {

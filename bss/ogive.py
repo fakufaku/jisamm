@@ -29,6 +29,7 @@ import numpy as np
 
 from .projection_back import project_back
 from .utils import tensor_H
+from .update_rules import _parametric_background_update
 
 
 def ogive_mix(X, **kwargs):
@@ -168,21 +169,18 @@ def ogive(
     X_ref = X  # keep a reference to input signal
     X = X.swapaxes(0, 1).copy()  # more efficient order for processing
 
+    if callback is not None or return_filters:
+        W = np.zeros((n_freq, n_chan, n_chan), dtype=X.dtype)
+        W[:, :, :] = np.eye(n_chan)[None, :, :]
+        W[:, 1:, 1:] *= -1
+
+    # Extract target
+    demix(Y, X, w)
+
     for epoch in range(n_iter):
         # compute the switching criterion
         if update == "switching" and epoch % 10 == 0:
             switching_criterion()
-
-        # Extract the target signal
-        demix(Y, X, w)
-
-        # Now run any necessary callback
-        if callback is not None and epoch in callback_checkpoints:
-            Y_tmp = Y.swapaxes(0, 1).copy()
-            if proj_back:
-                callback(project_back(Y_tmp, X_ref[:, :, 0]))
-            else:
-                callback(Y_tmp)
 
         # simple loop as a start
         # shape: (n_frames, n_src)
@@ -220,13 +218,20 @@ def ogive(
         update_a_from_w(I_do_w)
         update_w_from_a(I_do_a)
 
+        # Extract the target signal
+        demix(Y, X, w)
+
         max_delta = np.max(np.linalg.norm(delta, axis=(1, 2)))
+
+        # Now run any necessary callback
+        if callback is not None and (epoch + 1) in callback_checkpoints:
+            W[:, :1, :] = tensor_H(w)
+            _parametric_background_update(1, W, Cx)
+            Y_tmp = Y.swapaxes(0, 1).copy()
+            callback(W, Y_tmp, model)
 
         if max_delta < tol:
             break
-
-    # Extract target
-    demix(Y, X, w)
 
     Y = Y.swapaxes(0, 1).copy()
     X = X.swapaxes(0, 1)
@@ -235,6 +240,8 @@ def ogive(
         Y = project_back(Y, X_ref[:, :, 0])
 
     if return_filters:
-        return Y, w
+        W[:, :1, :] = tensor_H(w)
+        W[:, 1:, :1] = a[:, 1:, :]
+        return Y, W
     else:
         return Y

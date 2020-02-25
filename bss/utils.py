@@ -32,6 +32,29 @@ def tensor_H(T):
     return np.conj(T).swapaxes(-2, -1)
 
 
+def cost_iva(W, Y, model=None):
+
+    n_frames, n_freq, n_src = Y.shape
+    n_freq_filt, n_chan, __ = W.shape
+
+    if n_freq_filt == 1:
+        W = np.broadcast_to(W, (n_freq, n_chan, n_chan))
+
+    if model == "laplace":
+        target_loss = np.sum(np.linalg.norm(Y, axis=1))
+    elif model == "gauss":
+        target_loss = np.sum(np.log(1. / np.linalg.norm(Y, axis=1)))
+    else:
+        raise ValueError("Invalid model")
+
+    # background loss is constant
+
+    _, logdet = np.linalg.slogdet(W)
+    demix_loss = -2 * n_frames * np.sum(logdet)
+
+    return target_loss + demix_loss
+
+
 class TwoStepsIterator(object):
     """
     Iterates two elements at a time between 0 and m - 1
