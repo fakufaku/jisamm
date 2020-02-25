@@ -285,7 +285,7 @@ def overiva(
         demix(Y, X, W[:, :n_src, :])
 
         # Monitor the algorithm progression
-        if callback is not None and (epoch + 1) in callback_checkpoints:
+        if callback is not None and (epoch + iter_step) in callback_checkpoints:
             Y_tmp = Y.transpose([2, 0, 1])
             callback(W, Y_tmp, model)
 
