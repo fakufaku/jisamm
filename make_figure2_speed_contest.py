@@ -109,6 +109,7 @@ if __name__ == "__main__":
         "AuxIVA-IP",
         "AuxIVA-IP2",
         "PCA+AuxIVA-IP",
+        "PCA",
     ]
 
     sns.set(

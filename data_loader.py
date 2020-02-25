@@ -20,6 +20,7 @@ substitutions = {
         "auxiva_laplace": "AuxIVA-IP",
         "auxiva2_laplace": "AuxIVA-IP2",
         "auxiva_pca": "PCA+AuxIVA-IP",
+        "pca": "PCA",
     }
 }
 
