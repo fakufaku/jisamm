@@ -174,14 +174,18 @@ if __name__ == "__main__":
                 index=args[1], columns=args[0], values=args[2], aggfunc=np.mean
             )
             # import pdb; pdb.set_trace()
-            print(d)
             sns.heatmap(d, **kwargs)
             ax = plt.gca()
 
-        fg = sns.FacetGrid(df_agg, col="SINR", row="Algorithm")
+        fg = sns.FacetGrid(df_agg, col="SINR", row="Algorithm", margin_titles=True)
         fg.map_dataframe(
             draw_heatmap, "Interferers", "Distance", "value", cbar=False, vmin=0., vmax=1.  # square=True
         )
+        for ax in fg.axes.flat:
+            plt.setp(ax.texts, text="")
+        fg.set_titles(col_template="SINR = {col_name} [dB]", row_template="{row_name}")
+        fg.set_xlabels("# Interferers")
+        fg.set_ylabels("Critical Distance [%]")
 
         PCM=ax.get_children()[0]
         cbar_ax = fg.fig.add_axes([1.015,0.2, 0.015, 0.6])

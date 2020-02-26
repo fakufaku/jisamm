@@ -53,7 +53,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [2, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "overiva_ip_block_laplace" : {
@@ -71,7 +71,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [2, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "overiva_demix_bg_laplace" : {
@@ -109,7 +109,7 @@
         "n_iter" : 50,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [2, 4, 6, 8, 10, 20, 30, 40, 50]
       }
     },
     "auxiva_pca" : {

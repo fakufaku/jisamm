@@ -175,7 +175,7 @@ def load_data(dirs, pickle=False):
                             np.mean(sir_f),
                             np.mean(sdr_f - sdr_i),
                             np.mean(sir_f - sir_i),
-                            float(np.mean(sir_f - sir_i) >= 1.0),
+                            float(np.mean(sir_f > 0.0)),
                         ]
                     )
                 except Exception:
@@ -190,6 +190,7 @@ def load_data(dirs, pickle=False):
         rt60.to_pickle(rt60_file)
 
         if number_failed_records > 0:
+            import warnings
             warnings.warn(f"Number of failed record: {number_failed_records}")
 
     # apply the subsititutions
