@@ -3,7 +3,7 @@
 
   "seed": 12345,
   "repeat": 100,
-  "sinr": [5],
+  "sinr": [10],
   "n_targets": [1, 2, 3],
   "n_interferers": [10],
   "n_mics": [2, 3, 5, 8],
@@ -32,93 +32,93 @@
     "five_laplace" : {
       "algo" : "five",
       "kwargs" : {
-        "n_iter" : 50,
+        "n_iter" : 100,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
       }
     },
     "overiva_ip_laplace" : {
       "algo" : "overiva-ip",
       "kwargs" : {
-        "n_iter" : 50,
+        "n_iter" : 100,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
       }
     },
     "overiva_ip2_laplace" : {
       "algo" : "overiva-ip2",
       "kwargs" : {
-        "n_iter" : 50,
+        "n_iter" : 100,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [2, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
       }
     },
     "overiva_ip_block_laplace" : {
       "algo" : "overiva-ip-block",
       "kwargs" : {
-        "n_iter" : 50,
+        "n_iter" : 100,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 50]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 50, 60, 70, 80, 90, 100]
       }
     },
     "overiva_ip2_block_laplace" : {
       "algo" : "overiva-ip2-block",
       "kwargs" : {
-        "n_iter" : 50,
+        "n_iter" : 100,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [2, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
       }
     },
     "overiva_demix_bg_laplace" : {
       "algo" : "overiva-demix-bg",
       "kwargs" : {
-        "n_iter" : 50,
+        "n_iter" : 100,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
       }
     },
     "ogive_laplace" : {
       "algo" : "ogive-switch",
       "kwargs" : {
-        "n_iter": 1000,
+        "n_iter": 2000,
         "step_size": 0.1,
         "tol": 1e-3,
         "model": "laplace",
         "init": "pca",
-        "callback_checkpoints" : [20, 40, 60, 80, 120, 160, 200, 400, 600, 800, 1000]
+        "callback_checkpoints" : [20, 40, 60, 80, 120, 160, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
       }
     },
     "auxiva_laplace" : {
       "algo" : "auxiva",
       "kwargs" : {
-        "n_iter" : 50,
+        "n_iter" : 100,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
       }
     },
     "auxiva2_laplace" : {
       "algo" : "auxiva2",
       "kwargs" : {
-        "n_iter" : 50,
+        "n_iter" : 100,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [2, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [2, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
       }
     },
     "auxiva_pca" : {
       "algo" : "auxiva-pca",
       "kwargs" : {
-        "n_iter" : 50,
+        "n_iter" : 100,
         "model" : "laplace",
         "init": "pca",
-        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50]
+        "callback_checkpoints" : [1, 2, 3, 4, 6, 8, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
       }
     },
     "pca" : {
