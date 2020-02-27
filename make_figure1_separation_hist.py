@@ -108,7 +108,7 @@ if __name__ == "__main__":
         "OGIVEs",
         "AuxIVA-IP",
         "AuxIVA-IP2",
-        "PCA+AuxIVA-IP",
+        # "PCA+AuxIVA-IP",
     ]
 
     sns.set(
@@ -158,16 +158,14 @@ if __name__ == "__main__":
     aspect = 4 / 2  # width / height
     height = full_width / aspect
 
-    all_algos_fig3 = all_algos
-
-    sinr = 5
+    sinr = parameters["sinr"][0]
     iteration_index = 12
     n_interferers = 10
     m_name = "improvements"
     metric = the_metrics[m_name]
 
     select = (
-        np.logical_or(df_melt["Iteration_Index"] == iteration_index, df_melt["Iteration"] == 10)
+        np.logical_or(df_melt["Iteration"] == 100, df_melt["Iteration"] == 2000)
         & (df_melt["Interferers"] == n_interferers)
         & (df_melt["SINR"] == sinr)
         & df_melt.metric.isin(metric)
@@ -182,8 +180,8 @@ if __name__ == "__main__":
         row="Sources",
         col="metric",
         col_order=metric,
-        hue_order=all_algos_fig3,
-        kind="violin",
+        hue_order=all_algos,
+        kind="box",
         legend=False,
         aspect=aspect,
         height=height,
@@ -192,13 +190,14 @@ if __name__ == "__main__":
         whis=np.inf,
         sharey="row",
         # size=3, aspect=0.65,
-        # margin_titles=True,
+        margin_titles=True,
     )
 
     g.set(clip_on=False) #, ylim=[-1, 14])
     # remove original titles before adding custom ones
     [plt.setp(ax.texts, text="") for ax in g.axes.flat]
     g.set_titles(col_template="{col_name}", row_template="{row_name} Sources")
+    g.set_ylabels("Decibels")
 
     all_artists = []
 
@@ -217,9 +216,7 @@ if __name__ == "__main__":
 
     sns.despine(offset=10, trim=False, left=True, bottom=True)
 
-    plt.tight_layout(pad=0.5)
-
-    g.facet_axis(0, 0).set_ylabel("")
+    plt.tight_layout()
 
     """
     for c, lbl in enumerate(metric):
@@ -231,7 +228,7 @@ if __name__ == "__main__":
         fig_fn = os.path.join(
             fig_dir, f"figure1_{m_name}_interf{n_interferers}_sinr{sinr}.{ext}"
         )
-        plt.savefig(fig_fn, bbox_extra_artists=all_artists, bbox_inches="tight")
+        plt.savefig(fig_fn, bbox_extra_artists=all_artists)  #, bbox_inches="tight")
     plt.close()
 
     if plot_flag:

@@ -173,19 +173,21 @@ if __name__ == "__main__":
             d = data.pivot_table(
                 index=args[1], columns=args[0], values=args[2], aggfunc=np.mean
             )
-            # import pdb; pdb.set_trace()
-            sns.heatmap(d, **kwargs)
+            ax_hm = sns.heatmap(d, **kwargs)
+            ax_hm.invert_yaxis()
             ax = plt.gca()
 
-        fg = sns.FacetGrid(df_agg, col="SINR", row="Algorithm", margin_titles=True)
+        fg = sns.FacetGrid(df_agg, col="SINR", row="Algorithm", margin_titles=True, aspect=1, height=full_width/4.5)
         fg.map_dataframe(
-            draw_heatmap, "Interferers", "Distance", "value", cbar=False, vmin=0., vmax=1.  # square=True
+            draw_heatmap, "Interferers", "Distance", "value", cbar=False, vmin=0., vmax=1., square=True
         )
         for ax in fg.axes.flat:
             plt.setp(ax.texts, text="")
         fg.set_titles(col_template="SINR = {col_name} [dB]", row_template="{row_name}")
         fg.set_xlabels("# Interferers")
-        fg.set_ylabels("Critical Distance [%]")
+        fg.set_ylabels("Ratio to Critical Distance")
+        for ax in fg.axes.flat:
+            plt.setp(ax.texts, bbox=dict(alpha=0.))
 
         PCM=ax.get_children()[0]
         cbar_ax = fg.fig.add_axes([1.015,0.2, 0.015, 0.6])
