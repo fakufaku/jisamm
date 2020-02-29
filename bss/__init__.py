@@ -39,6 +39,8 @@ from .utils import cost_iva
 
 from .projection_back import project_back
 
+from . import default
+
 
 algos = {
     "auxiva": auxiva,

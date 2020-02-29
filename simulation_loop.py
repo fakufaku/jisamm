@@ -163,7 +163,7 @@ def run(args, parameters):
             )
 
         if "model" not in kwargs:
-            local_model = bss.default_model
+            local_model = bss.default.model
         else:
             local_model = kwargs["model"]
 

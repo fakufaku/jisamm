@@ -120,7 +120,6 @@ def load_data(dirs, pickle=False):
             if "callback_checkpoints" in algo_kwargs:
                 checkpoints = algo_kwargs["callback_checkpoints"].copy()
                 checkpoints.insert(0, 0)
-                checkpoints.append(algo_kwargs["n_iter"])
                 algo_n_iter = algo_kwargs["n_iter"]
             else:
                 checkpoints = list(range(len(record["sdr"])))
@@ -176,7 +175,7 @@ def load_data(dirs, pickle=False):
                             np.mean(sir_f),
                             np.mean(sdr_f - sdr_i),
                             np.mean(sir_f - sir_i),
-                            float(np.mean(sir_f - sir_i) >= 1.0),
+                            float(np.mean(sir_f > 0.0)),
                         ]
                     )
                 except Exception:
@@ -191,6 +190,7 @@ def load_data(dirs, pickle=False):
         rt60.to_pickle(rt60_file)
 
         if number_failed_records > 0:
+            import warnings
             warnings.warn(f"Number of failed record: {number_failed_records}")
 
     # apply the subsititutions

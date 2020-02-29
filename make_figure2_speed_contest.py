@@ -152,7 +152,7 @@ if __name__ == "__main__":
     # Convergence curves: Time/Iteration vs SDR
     aspect = 0.9
     height = ((full_width - 0.8) / len(parameters["sinr"])) / aspect
-    sinr = 5
+    sinr = parameters["sinr"][0]
     n_interferers = 10
 
     for key, metric in {"sisdr": "\u0394SI-SDR [dB]", "sisir": "\u0394SI-SIR [dB]"}.items():

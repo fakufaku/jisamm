@@ -1,3 +1,4 @@
+import random
 import time
 import json
 from pathlib import Path
@@ -216,8 +217,13 @@ def exp2_gen_args(config):
 
 def generate(config):
     if config["name"] == "speed_contest":
-        return exp1_gen_args(config)
+        args = exp1_gen_args(config)
     elif config["name"] == "reverb_interf_performance":
-        return exp2_gen_args(config)
+        args = exp2_gen_args(config)
     else:
         raise ValueError("Invalid experiment name in the configuration")
+
+    # randomize the execution order
+    random.shuffle(args)
+
+    return args
