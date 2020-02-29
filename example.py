@@ -332,7 +332,7 @@ if __name__ == "__main__":
         new_ord = np.argsort(np.std(y, axis=0))[::-1]
         y = y[:, new_ord]
 
-    y_hat = y[:, :1]
+    y_hat = y[:, :n_sources_target]
 
     # Look at the result
     SDR = np.array(SDR)
