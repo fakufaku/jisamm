@@ -128,6 +128,16 @@ if __name__ == "__main__":
         3: ["OverIVA-IP", "OverIVA-IP2", "AuxIVA-IP2"],
     }
 
+    if not os.path.exists("figures"):
+        os.mkdir("figures")
+
+    fig_dir = "figures/{}_{}_{}".format(
+        parameters["name"], parameters["_date"], parameters["_git_sha"]
+    )
+
+    if not os.path.exists(fig_dir):
+        os.mkdir(fig_dir)
+
     sns.set(
         style="whitegrid",
         context="paper",
@@ -145,32 +155,23 @@ if __name__ == "__main__":
     )
     sns.set_palette(pal)
 
-    if not os.path.exists("figures"):
-        os.mkdir("figures")
-
-    fig_dir = "figures/{}_{}_{}".format(
-        parameters["name"], parameters["_date"], parameters["_git_sha"]
-    )
-
-    if not os.path.exists(fig_dir):
-        os.mkdir(fig_dir)
-
-    plt_kwargs = {
-        # "improvements": {"ylim": [-5.5, 20.5], "yticks": [-5, 0, 5, 10, 15]},
-        # "raw": {"ylim": [-5.5, 20.5], "yticks": [-5, 0, 5, 10, 15]},
-        # "runtime": {"ylim": [-0.5, 40.5], "yticks": [0, 10, 20, 30]},
-    }
-
-    full_width = 6.93  # inches, == 17.6 cm, double column width
-    half_width = 3.35  # inches, == 8.5 cm, single column width
-
-    # Third figure
-
     # width = aspect * height
     aspect = 1  # width / height
-    height = 0.74
+    heights = {
+        1: 0.74,
+        2: 0.775,
+        3: 0.775,
+    }
+    aspects = {
+        1: 1.,
+        2: 0.97,
+        3: 0.97,
+    }
 
     for n_targets in parameters["n_targets"]:
+
+        height = heights[n_targets]
+        aspect = aspects[n_targets]
 
         print("# Targets:", n_targets)
 
@@ -181,6 +182,10 @@ if __name__ == "__main__":
         )
 
         df_agg = df_melt[select].replace(algos_subst)
+        """
+        df_agg = df_agg[["SINR", "Algorithm", "Interferers", "Distance", "value"]]
+        df_agg = df_agg[df_agg["Algorithm"].isin([algos_subst[a] for a in algo_order[n_targets]])]
+        """
 
         def draw_heatmap(*args, **kwargs):
             global ax
@@ -189,10 +194,12 @@ if __name__ == "__main__":
             d = data.pivot_table(
                 index=args[1], columns=args[0], values=args[2], aggfunc=np.mean,
             )
+
             ax_hm = sns.heatmap(d, **kwargs)
             ax_hm.invert_yaxis()
 
             ax = plt.gca()
+            # import pdb; pdb.set_trace()
 
         fg = sns.FacetGrid(
             df_agg,
@@ -200,7 +207,7 @@ if __name__ == "__main__":
             row="Algorithm",
             row_order=[algos_subst[a] for a in algo_order[n_targets]],
             margin_titles=True,
-            aspect=1,
+            aspect=aspect,
             height=height,
         )
         fg.map_dataframe(
@@ -227,7 +234,6 @@ if __name__ == "__main__":
             for t in the_ax.texts:
                 if t.get_text() in algos_subst_rev:
                     t.set_text(algos_subst_rev[t.get_text()])
-            # import pdb; pdb.set_trace()
 
         n_rows = len(fg.axes)
         for r in range(n_rows):
@@ -238,8 +244,11 @@ if __name__ == "__main__":
             for tick in fg.axes[n_rows - 1][c].xaxis.get_major_ticks():
                 tick.label.set_fontsize(4)
 
-        # plt.tight_layout(pad=0.5, h_pad=0.5, w_pad=0.5)
+        plt.tight_layout(pad=0.5, h_pad=0.5, w_pad=0.5)
+        if n_targets > 1:
+            fg.fig.subplots_adjust(wspace=-0.018)
 
+        # set the colorbar on the side of all plots
         PCM = ax.get_children()[0]
         cbar_ax = fg.fig.add_axes([1.015, 0.2, 0.015, 0.6])
         plt.colorbar(PCM, cax=cbar_ax)
@@ -248,7 +257,7 @@ if __name__ == "__main__":
             fig_fn = os.path.join(fig_dir, f"figure3_success_tgt{n_targets}.{ext}")
             # plt.savefig(fig_fn, bbox_extra_artists=all_artists, bbox_inches="tight")
             # plt.savefig(fig_fn, bbox_extra_artists=[cbar_ax], bbox_inches="tight")
-            plt.savefig(fig_fn, bbox_extra_artists=[cbar_ax], bbox_inches="tight")
+            plt.savefig(fig_fn, bbox_inches="tight")
 
         plt.clf()
         plt.close()
