@@ -11,10 +11,10 @@ import pandas as pd
 substitutions = {
     "Algorithm": {
         "five_laplace": "FIVE",
-        "overiva_ip_laplace": "OverIVA-IP-Param",
-        "overiva_ip2_laplace": "OverIVA-IP2-Param",
-        "overiva_ip_block_laplace": "OverIVA-IP-Block",
-        "overiva_ip2_block_laplace": "OverIVA-IP2-Block",
+        "overiva_ip_laplace": "OverIVA-IP",
+        "overiva_ip2_laplace": "OverIVA-IP2",
+        "overiva_ip_block_laplace": "OverIVA-IP-NP",
+        "overiva_ip2_block_laplace": "OverIVA-IP2-NP",
         "overiva_demix_bg_laplace": "OverIVA-Demix/BG",
         "ogive_laplace": "OGIVEs",
         "auxiva_laplace": "AuxIVA-IP",

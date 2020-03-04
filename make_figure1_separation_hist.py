@@ -99,16 +99,15 @@ if __name__ == "__main__":
     )
 
     all_algos = [
-        "FIVE",
-        "OverIVA-IP-Param",
-        "OverIVA-IP2-Param",
-        "OverIVA-IP-Block",
-        "OverIVA-IP2-Block",
+        "OverIVA-IP",
+        "OverIVA-IP-NP",
+        "OverIVA-IP2",
+        "OverIVA-IP2-NP",
         "OverIVA-Demix/BG",
+        "FIVE",
         "OGIVEs",
         "AuxIVA-IP",
         "AuxIVA-IP2",
-        # "PCA+AuxIVA-IP",
     ]
 
     sns.set(
@@ -157,6 +156,7 @@ if __name__ == "__main__":
     # width = aspect * height
     aspect = 4 / 2  # width / height
     height = full_width / aspect
+    height = 1.6
 
     sinr = parameters["sinr"][0]
     iteration_index = 12
@@ -193,7 +193,7 @@ if __name__ == "__main__":
         margin_titles=True,
     )
 
-    g.set(clip_on=False) #, ylim=[-1, 14])
+    g.set(clip_on=False)
     # remove original titles before adding custom ones
     [plt.setp(ax.texts, text="") for ax in g.axes.flat]
     g.set_titles(col_template="{col_name}", row_template="{row_name} Sources")
@@ -202,14 +202,14 @@ if __name__ == "__main__":
     all_artists = []
 
     # left_ax = g.facet_axis(2, 0)
-    left_ax = g.facet_axis(0, 0)
+    left_ax = g.facet_axis(2, 0)
     leg = left_ax.legend(
         title="Algorithms",
         frameon=True,
         framealpha=0.85,
         fontsize="x-small",
-        loc="upper left",
-        bbox_to_anchor=[-0.08, 1.08],
+        loc="lower left",
+        # bbox_to_anchor=[-0.08, 1.08],
     )
     leg.get_frame().set_linewidth(0.2)
     all_artists.append(leg)
