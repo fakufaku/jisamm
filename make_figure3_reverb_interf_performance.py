@@ -124,8 +124,8 @@ if __name__ == "__main__":
 
     algo_order = {
         1: ["OverIVA-IP", "FIVE", "OGIVEs", "AuxIVA-IP2"],
-        2: ["OverIVA-IP", "OverIVA-IP2", "AuxIVA-IP2"],
-        3: ["OverIVA-IP", "OverIVA-IP2", "AuxIVA-IP2"],
+        2: ["OverIVA-IP", "OverIVA-IP2", "OverIVA-Demix/BG", "AuxIVA-IP2"],
+        3: ["OverIVA-IP", "OverIVA-IP2", "OverIVA-Demix/BG", "AuxIVA-IP2"],
     }
 
     if not os.path.exists("figures"):
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     sns.set(
         style="whitegrid",
         context="paper",
-        font_scale=0.5,
+        font_scale=0.4,
         rc={
             # 'figure.figsize': (3.39, 3.15),
             "lines.linewidth": 1.0,
@@ -155,18 +155,31 @@ if __name__ == "__main__":
     )
     sns.set_palette(pal)
 
+    # Values leading to consistent spacing
+    # for 3 rows: heights = 0.775, aspect = 0.97
+    # for 4 rows: height = 0.74, aspect = 1.
+
     # width = aspect * height
-    aspect = 1  # width / height
     heights = {
-        1: 0.74,
-        2: 0.775,
-        3: 0.775,
+        1: 0.65,
+        2: 0.65,
+        3: 0.65,
     }
     aspects = {
-        1: 1.,
-        2: 0.97,
-        3: 0.97,
+        1: 1.0,
+        2: 1.0,
+        3: 1.0,
     }
+
+    # create "manually" the ylabels with the distance
+    critical_distance_m = parameters["room"]["critical_distance_m"]
+    distances = critical_distance_m * np.array(parameters["dist_crit_ratio"])
+    yticklabels = []
+    for i, d in enumerate(distances):
+        if i in [0, 3, 6, 9]:
+            yticklabels.append(f"{100 * d:.0f}")
+        else:
+            yticklabels.append("")
 
     for n_targets in parameters["n_targets"]:
 
@@ -219,7 +232,8 @@ if __name__ == "__main__":
             vmin=0.0,
             vmax=1.0,
             xticklabels=[1, "", "", 4, "", "", 7, "", "", 10],
-            yticklabels=[10, "", "", 40, "", "", 70, "", "", 100],
+            # yticklabels=[10, "", "", 40, "", "", 70, "", "", 100],
+            yticklabels=yticklabels,
             square=True,
         )
 
@@ -227,7 +241,7 @@ if __name__ == "__main__":
             plt.setp(the_ax.texts, text="")
         fg.set_titles(col_template="SINR = {col_name} [dB]", row_template="{row_name}")
         fg.set_xlabels("# Interferers", fontsize="small")
-        fg.set_ylabels("Critical Distance [%]")
+        fg.set_ylabels("Distance [cm]")
         for the_ax in fg.axes.flat:
             plt.setp(the_ax.texts, bbox=dict(alpha=0.0))
             plt.setp(the_ax.title, bbox=dict(alpha=0.0))
@@ -245,8 +259,10 @@ if __name__ == "__main__":
                 tick.label.set_fontsize(4)
 
         plt.tight_layout(pad=0.5, h_pad=0.5, w_pad=0.5)
+        """
         if n_targets > 1:
             fg.fig.subplots_adjust(wspace=-0.018)
+        """
 
         # set the colorbar on the side of all plots
         PCM = ax.get_children()[0]

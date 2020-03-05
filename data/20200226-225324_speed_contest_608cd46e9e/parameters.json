@@ -1,0 +1,273 @@
+{
+  "name": "speed_contest",
+  "seed": 12345,
+  "repeat": 100,
+  "sinr": [
+    5
+  ],
+  "n_targets": [
+    1,
+    2,
+    3
+  ],
+  "n_interferers": [
+    10
+  ],
+  "n_mics": [
+    2,
+    3,
+    5,
+    8
+  ],
+  "dist_crit_ratio": [
+    1.0
+  ],
+  "samples_list": "./samples/metadata.json",
+  "room_cache_file": "./data/experiment1_rooms.json",
+  "mix_params": {
+    "diffuse_ratio": 0.99,
+    "ref_mic": 0
+  },
+  "room_params": {
+    "mic_delta": 0.02,
+    "fs": 16000,
+    "t60_interval": [
+      0.15,
+      0.35
+    ],
+    "room_width_interval": [
+      6,
+      10
+    ],
+    "room_height_interval": [
+      2.8,
+      4.5
+    ],
+    "source_zone_height": [
+      1.0,
+      2.0
+    ],
+    "guard_zone_width": 0.5
+  },
+  "stft_params": {
+    "framesize": 4096,
+    "hop": 1024,
+    "window": "hamming"
+  },
+  "algorithm_kwargs": {
+    "five_laplace": {
+      "algo": "five",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          20,
+          30,
+          40,
+          50
+        ]
+      }
+    },
+    "overiva_ip_laplace": {
+      "algo": "overiva-ip",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          20,
+          30,
+          40,
+          50
+        ]
+      }
+    },
+    "overiva_ip2_laplace": {
+      "algo": "overiva-ip2",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          2,
+          4,
+          6,
+          8,
+          10,
+          20,
+          30,
+          40,
+          50
+        ]
+      }
+    },
+    "overiva_ip_block_laplace": {
+      "algo": "overiva-ip-block",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          20,
+          30,
+          50
+        ]
+      }
+    },
+    "overiva_ip2_block_laplace": {
+      "algo": "overiva-ip2-block",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          2,
+          4,
+          6,
+          8,
+          10,
+          20,
+          30,
+          40,
+          50
+        ]
+      }
+    },
+    "overiva_demix_bg_laplace": {
+      "algo": "overiva-demix-bg",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          20,
+          30,
+          40,
+          50
+        ]
+      }
+    },
+    "ogive_laplace": {
+      "algo": "ogive-switch",
+      "kwargs": {
+        "n_iter": 1000,
+        "step_size": 0.1,
+        "tol": 0.001,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          20,
+          40,
+          60,
+          80,
+          120,
+          160,
+          200,
+          400,
+          600,
+          800,
+          1000
+        ]
+      }
+    },
+    "auxiva_laplace": {
+      "algo": "auxiva",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          20,
+          30,
+          40,
+          50
+        ]
+      }
+    },
+    "auxiva2_laplace": {
+      "algo": "auxiva2",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          2,
+          4,
+          6,
+          8,
+          10,
+          20,
+          30,
+          40,
+          50
+        ]
+      }
+    },
+    "auxiva_pca": {
+      "algo": "auxiva-pca",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          20,
+          30,
+          40,
+          50
+        ]
+      }
+    },
+    "pca": {
+      "algo": "pca",
+      "kwargs": {}
+    }
+  },
+  "_git_sha": "608cd46e9e",
+  "_date": "20200226-225324",
+  "_base_dir": "/home/robin/code/2020IEEEAccess_overiva",
+  "_results_dir": "/home/robin/code/2020IEEEAccess_overiva/data/20200226-225324_speed_contest_608cd46e9e/",
+  "_parallel": true
+}

@@ -33,15 +33,18 @@ if __name__ == "__main__":
     )
 
     # Histogram of RT60
-    plt.figure(figsize=(1.675, 1.3))
+    plt.figure(figsize=(1.5 * 1.675, 1.5 * 1.2))
     plt.hist(rt60s * 1000.0)
     plt.xlabel("$T_{60}$ [ms]")
     plt.ylabel("Frequency")
     sns.despine(offset=10, trim=False, left=True, bottom=True)
     # plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.xticks([50, 150, 250, 350, 450])
+
+    plt.tight_layout(pad=0.)
+
     # plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
     fig_fn = f"figures/figure0_rt60_hist.pdf"
-    plt.savefig(fig_fn, bbox_inches="tight")
+    plt.savefig(fig_fn)
     plt.show()
     # plt.close()

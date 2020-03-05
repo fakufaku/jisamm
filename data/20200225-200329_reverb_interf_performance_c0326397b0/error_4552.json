@@ -1,0 +1,90 @@
+{
+    "algorithm": "overiva-ip2",
+    "n_src": 3,
+    "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+            50
+        ]
+    },
+    "result": {
+        "algorithm": "overiva_ip2_laplace",
+        "n_targets": 3,
+        "n_interferers": 8,
+        "n_mics": 7,
+        "rt60": 0.3945,
+        "dist_ratio": 0.8,
+        "sinr": 0,
+        "seed": 789925284,
+        "sdr": [
+            [
+                -6.643424239545309,
+                -7.033719537921625,
+                -7.1435686884739
+            ],
+            NaN
+        ],
+        "sir": [
+            [
+                -6.413451256201579,
+                -6.832157595539093,
+                -7.117794892539473
+            ],
+            NaN
+        ],
+        "cost": [
+            9130202.045406006
+        ],
+        "runtime": NaN,
+        "eval_time": NaN,
+        "n_samples": 350580
+    },
+    "tb": "Traceback (most recent call last):\n  File \"/home/robin/code/2020IEEEAccess_overiva/simulation_loop.py\", line 181, in run\n    **kwargs\n  File \"/home/robin/code/2020IEEEAccess_overiva/bss/__init__.py\", line 87, in separate\n    Y, W = algos[algorithm](X0, proj_back=False, return_filters=True, **kwargs)\n  File \"/home/robin/code/2020IEEEAccess_overiva/bss/overiva.py\", line 94, in overiva_ip2_param\n    return overiva(X, update_rule=\"ip2-param\", **kwargs)\n  File \"/home/robin/code/2020IEEEAccess_overiva/bss/overiva.py\", line 249, in overiva\n    _ip_double(s1, s2, X, W, r_inv[[s1, s2], :])\n  File \"/home/robin/code/2020IEEEAccess_overiva/bss/update_rules.py\", line 79, in _ip_double\n    lmbda_, R = np.linalg.eig(np.linalg.solve(HVH[0], HVH[1]))\n  File \"<__array_function__ internals>\", line 6, in eig\n  File \"/home/robin/.conda/envs/2020_scheibler_overiva/lib/python3.7/site-packages/numpy/linalg/linalg.py\", line 1295, in eig\n    _assert_finite(a)\n  File \"/home/robin/.conda/envs/2020_scheibler_overiva/lib/python3.7/site-packages/numpy/linalg/linalg.py\", line 218, in _assert_finite\n    raise LinAlgError(\"Array must not contain infs or NaNs\")\nnumpy.linalg.LinAlgError: Array must not contain infs or NaNs\n"
+},
+{
+    "algorithm": "auxiva-pca",
+    "n_src": 3,
+    "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+            50
+        ]
+    },
+    "result": {
+        "algorithm": "auxiva_pca",
+        "n_targets": 3,
+        "n_interferers": 8,
+        "n_mics": 7,
+        "rt60": 0.3945,
+        "dist_ratio": 0.8,
+        "sinr": 0,
+        "seed": 789925284,
+        "sdr": [
+            [
+                -6.643424239545309,
+                -7.033719537921625,
+                -7.1435686884739
+            ],
+            NaN
+        ],
+        "sir": [
+            [
+                -6.413451256201579,
+                -6.832157595539093,
+                -7.117794892539473
+            ],
+            NaN
+        ],
+        "cost": [
+            9130202.045406006
+        ],
+        "runtime": NaN,
+        "eval_time": NaN,
+        "n_samples": 350580
+    },
+    "tb": "Traceback (most recent call last):\n  File \"/home/robin/code/2020IEEEAccess_overiva/simulation_loop.py\", line 181, in run\n    **kwargs\n  File \"/home/robin/code/2020IEEEAccess_overiva/bss/__init__.py\", line 87, in separate\n    Y, W = algos[algorithm](X0, proj_back=False, return_filters=True, **kwargs)\n  File \"/home/robin/code/2020IEEEAccess_overiva/bss/auxiva_pca.py\", line 65, in auxiva_pca\n    new_X, W_pca = pca(X, n_src=n_src, return_filters=True)\n  File \"/home/robin/code/2020IEEEAccess_overiva/bss/pca.py\", line 60, in pca\n    eig_val, eig_vec = np.linalg.eigh(covmat)\n  File \"<__array_function__ internals>\", line 6, in eigh\n  File \"/home/robin/.conda/envs/2020_scheibler_overiva/lib/python3.7/site-packages/numpy/linalg/linalg.py\", line 1446, in eigh\n    w, vt = gufunc(a, signature=signature, extobj=extobj)\n  File \"/home/robin/.conda/envs/2020_scheibler_overiva/lib/python3.7/site-packages/numpy/linalg/linalg.py\", line 103, in _raise_linalgerror_eigenvalues_nonconvergence\n    raise LinAlgError(\"Eigenvalues did not converge\")\nnumpy.linalg.LinAlgError: Eigenvalues did not converge\n"
+},

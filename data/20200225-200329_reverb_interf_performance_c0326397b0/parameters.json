@@ -1,0 +1,184 @@
+{
+  "name": "reverb_interf_performance",
+  "seed": 12345,
+  "repeat": 30,
+  "sinr": [
+    -5,
+    0,
+    5,
+    10
+  ],
+  "n_targets": [
+    1,
+    2,
+    3
+  ],
+  "n_interferers": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "n_mics": [
+    7
+  ],
+  "dist_crit_ratio": [
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "samples_list": "./samples/metadata.json",
+  "mix_params": {
+    "diffuse_ratio": 0.99,
+    "ref_mic": 0
+  },
+  "room": {
+    "rt60_s": 0.415,
+    "critical_distance_m": 1.95,
+    "room_kwargs": {
+      "p": [
+        9,
+        12,
+        4.5
+      ],
+      "fs": 16000,
+      "absorption": 0.331,
+      "max_order": 34
+    },
+    "mic_array_geometry_m": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.02,
+        0.0,
+        0.0
+      ],
+      [
+        0.01,
+        0.017,
+        0.0
+      ],
+      [
+        -0.01,
+        0.017,
+        0.0
+      ],
+      [
+        -0.02,
+        0.0,
+        0.0
+      ],
+      [
+        -0.01,
+        -0.017,
+        0.0
+      ],
+      [
+        0.01,
+        -0.017,
+        0.0
+      ]
+    ],
+    "mic_array_location_m": [
+      4.496,
+      5.889,
+      2.327
+    ]
+  },
+  "stft_params": {
+    "framesize": 4096,
+    "hop": 1024,
+    "window": "hamming"
+  },
+  "algorithm_kwargs": {
+    "five_laplace": {
+      "algo": "five",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          50
+        ]
+      }
+    },
+    "overiva_ip_laplace": {
+      "algo": "overiva-ip",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          50
+        ]
+      }
+    },
+    "overiva_ip2_laplace": {
+      "algo": "overiva-ip2",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          50
+        ]
+      }
+    },
+    "ogive_laplace": {
+      "algo": "ogive-switch",
+      "kwargs": {
+        "n_iter": 1000,
+        "step_size": 0.1,
+        "tol": 0.001,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          1000
+        ]
+      }
+    },
+    "auxiva2_laplace": {
+      "algo": "auxiva2",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          50
+        ]
+      }
+    },
+    "auxiva_pca": {
+      "algo": "auxiva-pca",
+      "kwargs": {
+        "n_iter": 50,
+        "model": "laplace",
+        "init": "pca",
+        "callback_checkpoints": [
+          50
+        ]
+      }
+    }
+  },
+  "_git_sha": "c0326397b0",
+  "_date": "20200225-200329",
+  "_base_dir": "/home/robin/code/2020IEEEAccess_overiva",
+  "_results_dir": "/home/robin/code/2020IEEEAccess_overiva/data/20200225-200329_reverb_interf_performance_c0326397b0/",
+  "_parallel": true
+}
