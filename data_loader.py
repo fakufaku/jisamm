@@ -15,7 +15,7 @@ substitutions = {
         "overiva_ip2_laplace": "OverIVA-IP2",
         "overiva_ip_block_laplace": "OverIVA-IP-NP",
         "overiva_ip2_block_laplace": "OverIVA-IP2-NP",
-        "overiva_demix_bg_laplace": "OverIVA-Demix/BG",
+        "overiva_demix_bg_laplace": "OverIVA-DX/BG",
         "ogive_laplace": "OGIVEs",
         "auxiva_laplace": "AuxIVA-IP",
         "auxiva2_laplace": "AuxIVA-IP2",

@@ -104,7 +104,7 @@ if __name__ == "__main__":
         "3": "OverIVA-IP2",
         "4": "OverIVA-IP-NP",
         "5": "OverIVA-IP2-NP",
-        "6": "OverIVA-Demix/BG",
+        "6": "OverIVA-DX/BG",
         "7": "OGIVEs",
         "8": "AuxIVA-IP",
         "9": "AuxIVA-IP2",
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         "OverIVA-IP2": "3",
         "OverIVA-IP-NP": "4",
         "OverIVA-IP2-NP": "5",
-        "OverIVA-Demix/BG": "6",
+        "OverIVA-DX/BG": "6",
         "OGIVEs": "7",
         "AuxIVA-IP": "8",
         "AuxIVA-IP2": "9",
@@ -124,8 +124,8 @@ if __name__ == "__main__":
 
     algo_order = {
         1: ["OverIVA-IP", "FIVE", "OGIVEs", "AuxIVA-IP2"],
-        2: ["OverIVA-IP", "OverIVA-IP2", "OverIVA-Demix/BG", "AuxIVA-IP2"],
-        3: ["OverIVA-IP", "OverIVA-IP2", "OverIVA-Demix/BG", "AuxIVA-IP2"],
+        2: ["OverIVA-IP", "OverIVA-IP2", "OverIVA-DX/BG", "AuxIVA-IP2"],
+        3: ["OverIVA-IP", "OverIVA-IP2", "OverIVA-DX/BG", "AuxIVA-IP2"],
     }
 
     if not os.path.exists("figures"):
@@ -161,9 +161,9 @@ if __name__ == "__main__":
 
     # width = aspect * height
     heights = {
-        1: 0.65,
-        2: 0.65,
-        3: 0.65,
+        1: 0.68,
+        2: 0.68,
+        3: 0.68,
     }
     aspects = {
         1: 1.0,
@@ -194,11 +194,7 @@ if __name__ == "__main__":
             & (df_melt["metric"] == "Success")
         )
 
-        df_agg = df_melt[select].replace(algos_subst)
-        """
-        df_agg = df_agg[["SINR", "Algorithm", "Interferers", "Distance", "value"]]
-        df_agg = df_agg[df_agg["Algorithm"].isin([algos_subst[a] for a in algo_order[n_targets]])]
-        """
+        df_agg = df_melt[select]  # .replace(algos_subst)
 
         def draw_heatmap(*args, **kwargs):
             global ax
@@ -218,7 +214,7 @@ if __name__ == "__main__":
             df_agg,
             col="SINR",
             row="Algorithm",
-            row_order=[algos_subst[a] for a in algo_order[n_targets]],
+            row_order=algo_order[n_targets],
             margin_titles=True,
             aspect=aspect,
             height=height,
@@ -240,11 +236,11 @@ if __name__ == "__main__":
         for the_ax in fg.axes.flat:
             plt.setp(the_ax.texts, text="")
         fg.set_titles(col_template="SINR = {col_name} [dB]", row_template="{row_name}")
-        fg.set_xlabels("# Interferers", fontsize="small")
-        fg.set_ylabels("Distance [cm]")
+        fg.set_xlabels("# Interferers", fontsize="large")
+        fg.set_ylabels("Distance [cm]", fontsize="large")
         for the_ax in fg.axes.flat:
-            plt.setp(the_ax.texts, bbox=dict(alpha=0.0))
-            plt.setp(the_ax.title, bbox=dict(alpha=0.0))
+            plt.setp(the_ax.texts, bbox=dict(alpha=0.0), fontsize="large")
+            plt.setp(the_ax.title, bbox=dict(alpha=0.0), fontsize="large")
             for t in the_ax.texts:
                 if t.get_text() in algos_subst_rev:
                     t.set_text(algos_subst_rev[t.get_text()])
@@ -258,7 +254,7 @@ if __name__ == "__main__":
             for tick in fg.axes[n_rows - 1][c].xaxis.get_major_ticks():
                 tick.label.set_fontsize(4)
 
-        plt.tight_layout(pad=0.5, h_pad=0.5, w_pad=0.5)
+        plt.tight_layout(pad=0., h_pad=0.7, w_pad=0.7)
         """
         if n_targets > 1:
             fg.fig.subplots_adjust(wspace=-0.018)
@@ -273,7 +269,7 @@ if __name__ == "__main__":
             fig_fn = os.path.join(fig_dir, f"figure3_success_tgt{n_targets}.{ext}")
             # plt.savefig(fig_fn, bbox_extra_artists=all_artists, bbox_inches="tight")
             # plt.savefig(fig_fn, bbox_extra_artists=[cbar_ax], bbox_inches="tight")
-            plt.savefig(fig_fn, bbox_inches="tight")
+            plt.savefig(fig_fn, bbox_inches="tight", pad_inches=0.01)
 
         plt.clf()
         plt.close()

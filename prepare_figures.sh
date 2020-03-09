@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # make the figure with the RT60 distribution
-python ./make_figure_rt60_hist.py
+python ./make_figure_rt60_hist.py ./data/experiment1_rooms.json
 
 # figure with box-plots of SDR/SIR
 # SNR 5d dB: data/20200226-225324_speed_contest_608cd46e9e
