@@ -103,7 +103,7 @@ if __name__ == "__main__":
         "OverIVA-IP-NP",
         "OverIVA-IP2",
         "OverIVA-IP2-NP",
-        "OverIVA-Demix/BG",
+        "OverIVA-DX/BG",
         "FIVE",
         "OGIVEs",
         "AuxIVA-IP",
@@ -161,75 +161,77 @@ if __name__ == "__main__":
     sinr = parameters["sinr"][0]
     iteration_index = 12
     n_interferers = 10
-    m_name = "improvements"
-    metric = the_metrics[m_name]
 
-    select = (
-        np.logical_or(df_melt["Iteration"] == 100, df_melt["Iteration"] == 2000)
-        & (df_melt["Interferers"] == n_interferers)
-        & (df_melt["SINR"] == sinr)
-        & df_melt.metric.isin(metric)
-    )
+    for m_name in the_metrics.keys():
 
-    fig = plt.figure()
-    g = sns.catplot(
-        data=df_melt[select],
-        x="Mics",
-        y="value",
-        hue="Algorithm",
-        row="Sources",
-        col="metric",
-        col_order=metric,
-        hue_order=all_algos,
-        kind="box",
-        legend=False,
-        aspect=aspect,
-        height=height,
-        linewidth=0.5,
-        fliersize=0.3,
-        whis=np.inf,
-        sharey="row",
-        # size=3, aspect=0.65,
-        margin_titles=True,
-    )
+        metric = the_metrics[m_name]
 
-    g.set(clip_on=False)
-    # remove original titles before adding custom ones
-    [plt.setp(ax.texts, text="") for ax in g.axes.flat]
-    g.set_titles(col_template="{col_name}", row_template="{row_name} Sources")
-    g.set_ylabels("Decibels")
-
-    all_artists = []
-
-    # left_ax = g.facet_axis(2, 0)
-    left_ax = g.facet_axis(2, 0)
-    leg = left_ax.legend(
-        title="Algorithms",
-        frameon=True,
-        framealpha=0.85,
-        fontsize="x-small",
-        loc="lower left",
-        # bbox_to_anchor=[-0.08, 1.08],
-    )
-    leg.get_frame().set_linewidth(0.2)
-    all_artists.append(leg)
-
-    sns.despine(offset=10, trim=False, left=True, bottom=True)
-
-    plt.tight_layout()
-
-    """
-    for c, lbl in enumerate(metric):
-        g_ax = g.facet_axis(0, c)
-        g_ax.set_ylabel(lbl)
-    """
-
-    for ext in ["pdf", "png"]:
-        fig_fn = os.path.join(
-            fig_dir, f"figure1_{m_name}_interf{n_interferers}_sinr{sinr}.{ext}"
+        select = (
+            np.logical_or(df_melt["Iteration"] == 100, df_melt["Iteration"] == 2000)
+            & (df_melt["Interferers"] == n_interferers)
+            & (df_melt["SINR"] == sinr)
+            & df_melt.metric.isin(metric)
         )
-        plt.savefig(fig_fn, bbox_extra_artists=all_artists)  #, bbox_inches="tight")
-    plt.close()
+
+        fig = plt.figure()
+        g = sns.catplot(
+            data=df_melt[select],
+            x="Mics",
+            y="value",
+            hue="Algorithm",
+            row="Sources",
+            col="metric",
+            col_order=metric,
+            hue_order=all_algos,
+            kind="box",
+            legend=False,
+            aspect=aspect,
+            height=height,
+            linewidth=0.5,
+            fliersize=0.3,
+            # whis=np.inf,
+            sharey="row",
+            # size=3, aspect=0.65,
+            margin_titles=True,
+        )
+
+        g.set(clip_on=False)
+        # remove original titles before adding custom ones
+        [plt.setp(ax.texts, text="") for ax in g.axes.flat]
+        g.set_titles(col_template="{col_name}", row_template="{row_name} Sources")
+        g.set_ylabels("Decibels")
+
+        all_artists = []
+
+        # left_ax = g.facet_axis(2, 0)
+        left_ax = g.facet_axis(2, 0)
+        leg = left_ax.legend(
+            title="Algorithms",
+            frameon=True,
+            framealpha=0.85,
+            fontsize="x-small",
+            loc="lower left",
+            # bbox_to_anchor=[-0.08, 1.08],
+        )
+        leg.get_frame().set_linewidth(0.2)
+        all_artists.append(leg)
+
+        sns.despine(offset=10, trim=False, left=True, bottom=True)
+
+        plt.tight_layout()
+
+        """
+        for c, lbl in enumerate(metric):
+            g_ax = g.facet_axis(0, c)
+            g_ax.set_ylabel(lbl)
+        """
+
+        for ext in ["pdf", "png"]:
+            fig_fn = os.path.join(
+                fig_dir, f"figure1_{m_name}_interf{n_interferers}_sinr{sinr}.{ext}"
+            )
+            plt.savefig(fig_fn, bbox_extra_artists=all_artists)  #, bbox_inches="tight")
+        plt.close()
 
     if plot_flag:
         plt.show()

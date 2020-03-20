@@ -104,7 +104,7 @@ if __name__ == "__main__":
         "OverIVA-IP-NP",
         "OverIVA-IP2",
         "OverIVA-IP2-NP",
-        "OverIVA-Demix/BG",
+        "OverIVA-DX/BG",
         "FIVE",
         "OGIVEs",
         "AuxIVA-IP",
@@ -178,9 +178,9 @@ if __name__ == "__main__":
 
     # Second figure
     # Convergence curves: Time/Iteration vs SDR
-    aspect = 1.0
+    aspect = 1.2
     # height = ((full_width - 0.8) / len(parameters["sinr"])) / aspect
-    height = 1.4
+    height = 1.2
     sinr = parameters["sinr"][0]
     n_interferers = 10
 
@@ -221,7 +221,7 @@ if __name__ == "__main__":
         for r, lbl in enumerate(row_order):
             g.facet_axis(r, 0).set_ylabel(lbl)
 
-        plt.tight_layout(pad=0.5, w_pad=2.0, h_pad=1.0)
+        plt.tight_layout(pad=0.5, w_pad=2.0, h_pad=2.0)
         g.despine(left=True).add_legend(fontsize="x-small")
 
         for r in range(len(row_order)):
@@ -234,6 +234,9 @@ if __name__ == "__main__":
                 g.axes[r][c].grid(False, axis="x")
                 if r == 0:
                     g.axes[r][c].yaxis.set_major_locator(MaxNLocator(integer=True))
+
+        # align the y-axis labels
+        g.fig.align_ylabels(g.axes[:, 0])
 
         for ext in ["pdf", "png"]:
             fig_fn = os.path.join(
