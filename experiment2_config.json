@@ -86,6 +86,15 @@
         "callback_checkpoints" : [50]
       }
     },
+    "overiva_demix_bg_laplace" : {
+      "algo" : "overiva-demix-bg",
+      "kwargs" : {
+        "n_iter" : 50,
+        "model" : "laplace",
+        "init": "pca",
+        "callback_checkpoints" : [50]
+      }
+    },
     "auxiva_pca" : {
       "algo" : "auxiva-pca",
       "kwargs" : {
