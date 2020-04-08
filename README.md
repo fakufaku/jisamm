@@ -47,6 +47,50 @@ We vary three parameters
 * The number of interferers (background Gaussianity)
 * The distance from microphones to sources (reverberation time)
 
+Test Run the Algorithms
+-----------------------
+
+The `example.py` programe allows to test the different algorithms on simulated scenarios.
+For example, try running
+
+    python ./example.py -a overiva-ip2 -s 2 -m 4
+
+to extract two sources with four microphones using the algorithm `overiva-ip2`.
+The full usage instructions is provided below.
+
+    > python ./example.py --help
+    usage: example.py [-h] [--no_cb] [-b BLOCK]
+                      [-a {auxiva,auxiva2,overiva,overiva-ip,overiva-ip2,overiva-ip-block,overiva-ip2-block,overiva-demix-bg,five,ogive,ogive-mix,ogive-demix,ogive-switch,auxiva-pca,pca}]
+                      [-d {laplace,gauss}] [-i {pca}] [-m MICS] [-s SRCS]
+                      [-z INTERF] [--sinr SINR] [-n N_ITER] [--gui] [--save]
+                      [--seed SEED]
+
+    Demonstration of blind source extraction using FIVE.
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --no_cb               Removes callback function
+      -b BLOCK, --block BLOCK
+                            STFT block size
+      -a {auxiva,auxiva2,overiva,overiva-ip,overiva-ip2,overiva-ip-block,overiva-ip2-block,overiva-demix-bg,five,ogive,ogive-mix,ogive-demix,ogive-switch,auxiva-pca,pca}, --algo {auxiva,auxiva2,overiva,overiva-ip,overiva-ip2,overiva-ip-block,overiva-ip2-block,overiva-demix-bg,five,ogive,ogive-mix,ogive-demix,ogive-switch,auxiva-pca,pca}
+                            Chooses BSS method to run
+      -d {laplace,gauss}, --dist {laplace,gauss}
+                            IVA model distribution
+      -i {pca}, --init {pca}
+                            Initialization, eye: identity, eig: principal
+                            eigenvectors
+      -m MICS, --mics MICS  Number of mics
+      -s SRCS, --srcs SRCS  Number of sources
+      -z INTERF, --interf INTERF
+                            Number of interferers
+      --sinr SINR           Signal-to-interference-and-noise ratio
+      -n N_ITER, --n_iter N_ITER
+                            Number of iterations
+      --gui                 Creates a small GUI for easy playback of the sound
+                            samples
+      --save                Saves the output of the separation to wav files
+      --seed SEED           Random number generator seed
+
 Reproduce the Results
 ---------------------
 
@@ -97,3 +141,7 @@ Figure 1., 2., 3., and 4. from the paper are produced then by running
 
     ./prepare_figures.sh
 
+License
+-------
+
+The code is provided under MIT license.
