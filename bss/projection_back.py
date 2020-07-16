@@ -1,5 +1,4 @@
-# Common Functions used in BSS algorithms
-# Copyright (C) 2019  Robin Scheibler, Yaron Dibner, Virgile Hernicot, Juan Azcarreta
+# Copyright (C) 2020  Robin Scheibler
 #                     MIT License
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
