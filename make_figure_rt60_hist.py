@@ -1,10 +1,10 @@
 import argparse
 import json
+import os
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
-
 
 if __name__ == "__main__":
 
@@ -38,13 +38,12 @@ if __name__ == "__main__":
     plt.xlabel("$T_{60}$ [ms]")
     plt.ylabel("Frequency")
     sns.despine(offset=10, trim=False, left=True, bottom=True)
-    # plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.xticks([50, 150, 250, 350, 450])
 
-    plt.tight_layout(pad=0.)
+    plt.tight_layout(pad=0.0)
 
-    # plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
+    if not os.path.exists("figures"):
+        os.mkdir("figures")
+
     fig_fn = f"figures/figure0_rt60_hist.pdf"
     plt.savefig(fig_fn)
-    plt.show()
-    # plt.close()

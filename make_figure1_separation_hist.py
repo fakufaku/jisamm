@@ -34,9 +34,9 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import MaxNLocator
 
-matplotlib.rc("pdf", fonttype=42)
-
 from data_loader import load_data
+
+matplotlib.rc("pdf", fonttype=42)
 
 
 if __name__ == "__main__":
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     }
 
     # width = aspect * height
-    aspect = 4 / 2  # width / height
+    aspect = 1.5  # width / height
     height = full_width / aspect
     height = 1.6
 
@@ -198,7 +198,7 @@ if __name__ == "__main__":
         g.set(clip_on=False)
         # remove original titles before adding custom ones
         [plt.setp(ax.texts, text="") for ax in g.axes.flat]
-        g.set_titles(col_template="{col_name}", row_template="{row_name} Sources")
+        g.set_titles(row_template="{row_name} Sources", col_template="{col_name}")
         g.set_ylabels("Decibels")
 
         all_artists = []
@@ -230,7 +230,9 @@ if __name__ == "__main__":
             fig_fn = os.path.join(
                 fig_dir, f"figure1_{m_name}_interf{n_interferers}_sinr{sinr}.{ext}"
             )
-            plt.savefig(fig_fn, bbox_extra_artists=all_artists)  #, bbox_inches="tight")
+            plt.savefig(
+                fig_fn, bbox_extra_artists=all_artists
+            )  # , bbox_inches="tight")
         plt.close()
 
     if plot_flag:
