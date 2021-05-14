@@ -21,26 +21,17 @@
 This package contains the main algorithms for
 overdetermined independent vector analysis
 """
-from .overiva import (
-    overiva,
-    overiva_ip_param,
-    overiva_ip2_param,
-    overiva_demix_bg,
-    overiva_ip_block,
-    overiva_ip2_block,
-    auxiva,
-    auxiva2,
-)
-from .five import five
-from .pca import pca
-from .auxiva_pca import auxiva_pca
-from .ogive import ogive, ogive_mix, ogive_demix, ogive_switch
-from .utils import cost_iva
-
-from .projection_back import project_back
-
 from . import default
-
+from .auxiva_pca import auxiva_pca
+from .fastiva import fastiva
+from .five import five
+from .ogive import ogive, ogive_demix, ogive_mix, ogive_switch
+from .overiva import (auxiva, auxiva2, overiva, overiva_demix_bg,
+                      overiva_ip2_block, overiva_ip2_param, overiva_ip_block,
+                      overiva_ip_param)
+from .pca import pca
+from .projection_back import project_back
+from .utils import cost_iva
 
 algos = {
     "auxiva": auxiva,
@@ -58,6 +49,7 @@ algos = {
     "ogive-switch": ogive_switch,
     "auxiva-pca": auxiva_pca,
     "pca": pca,
+    "fastiva": fastiva,
 }
 
 
@@ -113,6 +105,7 @@ is_single_source = {
     "ogive-mix": True,
     "ogive-demix": True,
     "ogive-switch": True,
+    "fastiva": False,
 }
 
 # This is a list that indicates which algorithms
@@ -133,6 +126,7 @@ is_dual_update = {
     "ogive-mix": False,
     "ogive-demix": False,
     "ogive-switch": False,
+    "fastiva": False,
 }
 
 is_determined = {
@@ -151,6 +145,7 @@ is_determined = {
     "ogive-mix": False,
     "ogive-demix": False,
     "ogive-switch": False,
+    "fastiva": False,
 }
 
 is_overdetermined = {
@@ -169,6 +164,7 @@ is_overdetermined = {
     "ogive-mix": True,
     "ogive-demix": True,
     "ogive-switch": True,
+    "fastiva": True,
 }
 
 is_iterative = {
@@ -187,4 +183,5 @@ is_iterative = {
     "ogive-mix": True,
     "ogive-demix": True,
     "ogive-switch": True,
+    "fastiva": True,
 }

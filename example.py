@@ -23,24 +23,24 @@ Overdetermined Blind Source Separation offline example
 This script requires the `mir_eval` to run, and `tkinter` and `sounddevice` packages for the GUI option.
 """
 import argparse
-import sys
 import json
+import sys
 import time
 
 import matplotlib
 import numpy as np
-
-# Get the data if needed
-from get_data import get_data, samples_dir
 import pyroomacoustics as pra
 from pyroomacoustics.bss import projection_back
-from routines import PlaySoundGUI, grid_layout, random_layout, semi_circle_layout
-from room_builder import callback_noise_mixer, convergence_callback
 from scipy.io import wavfile
 
 import bss
+# Get the data if needed
+from get_data import get_data, samples_dir
+from room_builder import (callback_noise_mixer, choose_target_locations,
+                          convergence_callback, random_locations)
+from routines import (PlaySoundGUI, grid_layout, random_layout,
+                      semi_circle_layout)
 from samples.generate_samples import sampling, wav_read_center
-from room_builder import random_locations, choose_target_locations
 
 # Once we are sure the data is there, import some methods
 # to select and read samples
@@ -144,13 +144,16 @@ if __name__ == "__main__":
     source_std = np.ones(n_sources_target)
 
     SINR = args.sinr  # signal-to-interference-and-noise ratio
-    SINR_diffuse_ratio = 0.9999  # ratio of uncorrelated to diffuse noise
+    if args.interf == 0:
+        SINR_diffuse_ratio = 0.0
+    else:
+        SINR_diffuse_ratio = 0.9999  # ratio of uncorrelated to diffuse noise
     ref_mic = 0  # the reference microphone for SINR and projection back
     # the distance between microphone array and targets as a ratio to the critical distance
     dist_ratio = 0.5
 
     # STFT parameters
-    framesize = 4096
+    framesize = 512
     hop = framesize // 4
     window = "hamming"
     stft_params = {"framesize": framesize, "hop": hop, "window": window}
@@ -183,11 +186,11 @@ if __name__ == "__main__":
 
     room_dim = config["room"]["room_kwargs"]["p"]
     mic_array_center = np.array(config["room"]["mic_array_location_m"])
-    angles = np.arange(n_mics - 1) * 2 * np.pi / (n_mics - 1)
+    angles = np.arange(n_mics) * 2 * np.pi / (n_mics)
     rel_mics_locs = np.vstack(
         [
-            np.concatenate(([0.], 0.02 * np.cos(angles))),
-            np.concatenate(([0.], 0.02 * np.sin(angles))),
+            0.02 * np.cos(angles),
+            0.02 * np.sin(angles),
             np.zeros(n_mics),
         ]
     )
@@ -205,7 +208,11 @@ if __name__ == "__main__":
 
     # Prepare the signals
     wav_files = sampling(
-        1, n_sources, f"{samples_dir}/metadata.json", gender_balanced=True, seed=np.random.randint(2 ** 32),
+        1,
+        n_sources,
+        f"{samples_dir}/metadata.json",
+        gender_balanced=True,
+        seed=np.random.randint(2 ** 32),
     )[0]
     signals = wav_read_center(wav_files, seed=123)
 
@@ -271,7 +278,9 @@ if __name__ == "__main__":
 
     if args.algo.startswith("ogive"):
         ogive_iter_step = n_iter // 20
-        callback_checkpoints = list(range(ogive_iter_step, n_iter + ogive_iter_step, ogive_iter_step))
+        callback_checkpoints = list(
+            range(ogive_iter_step, n_iter + ogive_iter_step, ogive_iter_step)
+        )
     elif not bss.is_iterative[args.algo]:
         callback_checkpoints = [1]
     else:

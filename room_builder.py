@@ -17,15 +17,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import time
 import itertools
 import math
+import time
 from typing import List, Optional, Tuple
 
 import numpy as np
 import pyroomacoustics as pra
-from pyroomacoustics.bss import projection_back
 from numpy.random import rand
+from pyroomacoustics.bss import projection_back
 
 import bss
 from metrics import si_bss_eval
@@ -106,7 +106,12 @@ def convergence_callback(
     t_in = time.perf_counter()
 
     # Compute the current value of the IVA cost function
-    cost_list.append(bss.cost_iva(W, Y, model=source_model))
+    if W.shape[-2] != W.shape[-1]:
+        cost_list.append(
+            bss.cost_iva(np.eye(W.shape[-1])[None, ...], Y, model=source_model)
+        )
+    else:
+        cost_list.append(bss.cost_iva(W, Y, model=source_model))
 
     # prepare STFT parameters
     framesize = stft_params["framesize"]

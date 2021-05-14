@@ -32,6 +32,10 @@ def tensor_H(T):
     return np.conj(T).swapaxes(-2, -1)
 
 
+def abs_square(X):
+    return X.real ** 2 + X.imag ** 2
+
+
 def cost_iva(W, Y, model=None):
 
     n_frames, n_freq, n_src = Y.shape
@@ -43,7 +47,7 @@ def cost_iva(W, Y, model=None):
     if model == "laplace":
         target_loss = np.sum(np.linalg.norm(Y, axis=1))
     elif model == "gauss":
-        target_loss = np.sum(np.log(1. / np.linalg.norm(Y, axis=1)))
+        target_loss = np.sum(np.log(1.0 / np.linalg.norm(Y, axis=1)))
     else:
         raise ValueError("Invalid model")
 
@@ -85,5 +89,3 @@ class TwoStepsIterator(object):
 
         else:
             raise StopIteration
-
-

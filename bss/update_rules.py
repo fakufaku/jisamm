@@ -36,7 +36,7 @@ def _ip_single(s, X, W, r_inv):
 
     # Compute Auxiliary Variable
     # shape: (n_freq, n_chan, n_chan)
-    V = np.matmul((X * r_inv[None, None, :]), tensor_H(X) / n_frames)
+    V = np.matmul((X * r_inv[None, None, :]), tensor_H(X)) / n_frames
 
     WV = np.matmul(W, V)
     rhs = np.eye(n_chan)[None, :, s]  # s-th canonical basis vector
@@ -97,9 +97,7 @@ def _parametric_background_update(n_src, W, Cx):
     J = W[:, n_src:, :n_src]  # background demixing matrix
 
     tmp = np.matmul(W_target, Cx)
-    J[:, :, :] = tensor_H(
-        np.linalg.solve(tmp[:, :, :n_src], tmp[:, :, n_src:])
-    )
+    J[:, :, :] = tensor_H(np.linalg.solve(tmp[:, :, :n_src], tmp[:, :, n_src:]))
 
 
 def _joint_demix_background(s, n_src, X, W, r_inv, Cx):
@@ -116,9 +114,7 @@ def _joint_demix_background(s, n_src, X, W, r_inv, Cx):
 
     # Compute Auxiliary Variable
     # shape: (n_freq, n_chan, n_chan)
-    V = (
-        np.matmul((X * r_inv[None, None, :]), tensor_H(X))
-    ) / n_frames
+    V = (np.matmul((X * r_inv[None, None, :]), tensor_H(X))) / n_frames
 
     # Basis for demixing vector
     Hw = np.linalg.solve(W @ V, rhs)
